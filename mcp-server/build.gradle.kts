@@ -24,6 +24,8 @@ val springAiVersion = "1.0.0-M6"
 dependencies {
     implementation("org.springframework.ai:spring-ai-mcp-server-webflux-spring-boot-starter")
 
+    implementation("org.jetbrains.kotlin:kotlin-reflect")
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
     testImplementation(platform("org.junit:junit-bom:5.12.1"))
