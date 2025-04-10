@@ -11,7 +11,6 @@ import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.temporal.ChronoUnit.DAYS
 
-
 @SpringBootApplication
 class McpServerApplication {
     @Bean
@@ -40,4 +39,3 @@ class DogAdoptionAppointmentScheduler {
 fun main(args: Array<String>) {
     runApplication<McpServerApplication>(*args)
 }
-

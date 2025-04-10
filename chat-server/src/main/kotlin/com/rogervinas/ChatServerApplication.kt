@@ -7,9 +7,11 @@ import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor
 import org.springframework.ai.chat.memory.InMemoryChatMemory
+import org.springframework.ai.document.Document
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.beans.factory.annotation.Value
+import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
@@ -23,12 +25,11 @@ import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.ResponseBody
 import java.util.concurrent.ConcurrentHashMap
 
-
 @SpringBootApplication
 class ChatServerApplication
 
 @Configuration
-internal class ConversationalConfiguration {
+class ConversationalConfiguration {
     @Bean
     fun mcpClient(@Value("\${mcp-server.url}") url: String) = McpClient
         .sync(HttpClientSseClientTransport(url))
@@ -61,13 +62,13 @@ internal class ConversationalConfiguration {
     }
 }
 
-internal interface DogRepository : ListCrudRepository<Dog, Int>
+interface DogRepository : ListCrudRepository<Dog, Int>
 
-data class Dog(@Id val id: Int, val name: String, val owner: String, val description: String)
+data class Dog(@Id val id: Int, val name: String, val owner: String?, val description: String)
 
 @Controller
 @ResponseBody
-internal class ConversationalController(vectorStore: VectorStore, private val chatClient: ChatClient) {
+class ConversationalController(vectorStore: VectorStore, private val chatClient: ChatClient) {
     private val questionAnswerAdvisor = QuestionAnswerAdvisor(vectorStore)
     private val chatMemory = ConcurrentHashMap<String, PromptChatMemoryAdvisor>()
 
@@ -81,6 +82,38 @@ internal class ConversationalController(vectorStore: VectorStore, private val ch
             .advisors(questionAnswerAdvisor, promptChatMemoryAdvisor)
             .call()
             .content()
+    }
+}
+
+@Configuration
+class DogDataInitializerConfiguration {
+
+    @Bean
+    fun initializerRunner(vectorStore: VectorStore, dogRepository: DogRepository): ApplicationRunner {
+        return ApplicationRunner {
+            dogRepository.deleteAll()
+            if (dogRepository.count() == 0L) {
+                println("initializing vector store");
+                var map = mapOf(
+                    "Jasper" to "A grey Shih Tzu known for being protective.",
+                    "Toby" to "A grey Doberman known for being playful.",
+                    "Nala" to "A spotted German Shepherd known for being loyal.",
+                    "Penny" to "A white Great Dane known for being protective.",
+                    "Bella" to "A golden Poodle known for being calm.",
+                    "Willow" to "A brindle Great Dane known for being calm.",
+                    "Daisy" to "A spotted Poodle known for being affectionate.",
+                    "Mia" to "A grey Great Dane known for being loyal.",
+                    "Molly" to "A golden Chihuahua known for being curious.",
+                    "Prancer" to "A demonic, neurotic, man hating, animal hating, children hating dogs that look like gremlins."
+                )
+                map.forEach { name, description ->
+                    var dog = dogRepository.save(Dog(0, name, null, description));
+                    var dogument = Document("id: ${dog.id}, name: ${dog.name}, description: ${dog.description}")
+                    vectorStore.add(listOf(dogument));
+                }
+                println("finished initializing vector store")
+            }
+        };
     }
 }
 
