@@ -1,0 +1,6 @@
+spring:
+  application:
+    name: mcp-server
+
+server:
+  port: 8081

@@ -1,0 +1,2 @@
+rootProject.name = "mcp-server"
+
