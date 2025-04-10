@@ -1,0 +1,9 @@
+services:
+
+  vectordb:
+    image: pgvector/pgvector:pg16
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=password
+    ports:
+      - "5432:5432"

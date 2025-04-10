@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: chat-server
+  datasource:
+    url: "jdbc:postgresql://localhost:5432/postgres"
+    username: "postgres"
+    password: "password"
+    driver-class-name: org.postgresql.Driver
+  flyway:
+    enabled: true
+  ai:
+    bedrock:
+      converse:
+        chat:
+          enabled: true
+          options:
+            model: "xxx"
+      cohere:
+        embedding:
+          enabled: true
+          model: "xxx"
+    vectorstore:
+      pgvector:
+        dimensions: 1024
+        initialize-schema: true
+
+server:
+  port: 8080
+
+mcp-server:
+  url: "http://localhost:8081"
