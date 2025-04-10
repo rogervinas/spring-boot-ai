@@ -95,6 +95,7 @@ class DogDataInitializerConfiguration {
             if (dogRepository.count() == 0L) {
                 println("initializing vector store");
                 var map = mapOf(
+                    "Rocky" to "A Boxer that needs to always say 'hi' and play with everybody he sees",
                     "Jasper" to "A grey Shih Tzu known for being protective.",
                     "Toby" to "A grey Doberman known for being playful.",
                     "Nala" to "A spotted German Shepherd known for being loyal.",
