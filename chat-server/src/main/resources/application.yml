@@ -9,23 +9,20 @@ spring:
   flyway:
     enabled: true
   ai:
-    bedrock:
-      aws:
-        access-key: "${AWS_ACCESS_KEY_ID}"
-        secret-key: "${AWS_SECRET_ACCESS_KEY}"
-        region: "${AWS_REGION}"
-      converse:
-        chat:
-          enabled: true
-          options:
-            model: "xxx"
-      cohere:
-        embedding:
-          enabled: true
-          model: "xxx"
+    ollama:
+      base-url: "http://localhost:11434"
+      init:
+        pull-model-strategy: "always"
+      chat:
+        enabled: true
+        options:
+          model: "gemma3:1b"
+      embedding:
+        enabled: true
+        model: "nomic-embed-text"
     vectorstore:
       pgvector:
-        dimensions: 1024
+        dimensions: 768
         initialize-schema: true
 
 server:
