@@ -16,7 +16,7 @@ spring:
       chat:
         enabled: true
         options:
-          model: "gemma3:1b"
+          model: "mistral:7b-instruct-v0.3-q8_0"
       embedding:
         enabled: true
         model: "nomic-embed-text"

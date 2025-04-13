@@ -9,6 +9,8 @@ import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor
 import org.springframework.ai.chat.memory.InMemoryChatMemory
 import org.springframework.ai.document.Document
 import org.springframework.ai.mcp.SyncMcpToolCallbackProvider
+import org.springframework.ai.tool.ToolCallbackProvider
+import org.springframework.ai.tool.method.MethodToolCallbackProvider
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.boot.ApplicationRunner
@@ -16,6 +18,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.context.annotation.Profile
 import org.springframework.data.annotation.Id
 import org.springframework.data.repository.ListCrudRepository
 import org.springframework.stereotype.Controller
@@ -31,6 +34,7 @@ class ChatServerApplication
 @Configuration
 class ConversationalConfiguration {
     @Bean
+    @Profile("!test")
     fun mcpClient(@Value("\${mcp-server.url}") url: String) = McpClient
         .sync(HttpClientSseClientTransport(url))
         .build().apply {
@@ -38,10 +42,15 @@ class ConversationalConfiguration {
         }
 
     @Bean
-    fun chatClient(
-        mcpSyncClient: McpSyncClient,
-        builder: ChatClient.Builder
-    ): ChatClient {
+    @Profile("!test")
+    fun toolCallbackProvider(mcpClient: McpSyncClient): ToolCallbackProvider {
+        return SyncMcpToolCallbackProvider(mcpClient)
+    }
+
+    fun chatClientBuilder(
+        builder: ChatClient.Builder,
+        toolCallbackProviders: List<ToolCallbackProvider>
+    ): ChatClient.Builder {
         val system = """
                 You are an AI powered assistant to help people adopt a dog from the adoption 
                 agency named Pooch Palace with locations in Atlanta, Antwerp, Seoul, Tokyo, Singapore, Paris, 
@@ -57,8 +66,15 @@ class ConversationalConfiguration {
                 """.trimIndent()
         return builder
             .defaultSystem(system)
-            .defaultTools(SyncMcpToolCallbackProvider(mcpSyncClient))
-            .build()
+            .defaultTools(*toolCallbackProviders.toTypedArray())
+    }
+
+    @Bean
+    fun chatClient(
+        builder: ChatClient.Builder,
+        toolCallbackProviders: List<ToolCallbackProvider>
+    ): ChatClient {
+        return chatClientBuilder(builder, toolCallbackProviders).build()
     }
 }
 
@@ -91,10 +107,9 @@ class DogDataInitializerConfiguration {
     @Bean
     fun initializerRunner(vectorStore: VectorStore, dogRepository: DogRepository): ApplicationRunner {
         return ApplicationRunner {
-            dogRepository.deleteAll()
             if (dogRepository.count() == 0L) {
                 println("initializing vector store");
-                var map = mapOf(
+                val map = mapOf(
                     "Rocky" to "A Boxer that needs to always say 'hi' and play with everybody he sees",
                     "Jasper" to "A grey Shih Tzu known for being protective.",
                     "Toby" to "A grey Doberman known for being playful.",
@@ -107,9 +122,9 @@ class DogDataInitializerConfiguration {
                     "Molly" to "A golden Chihuahua known for being curious.",
                     "Prancer" to "A demonic, neurotic, man hating, animal hating, children hating dogs that look like gremlins."
                 )
-                map.forEach { name, description ->
-                    var dog = dogRepository.save(Dog(0, name, null, description));
-                    var dogument = Document("id: ${dog.id}, name: ${dog.name}, description: ${dog.description}")
+                map.forEach { (name, description) ->
+                    val dog = dogRepository.save(Dog(0, name, null, description));
+                    val dogument = Document("id: ${dog.id}, name: ${dog.name}, description: ${dog.description}")
                     vectorStore.add(listOf(dogument));
                 }
                 println("finished initializing vector store")
