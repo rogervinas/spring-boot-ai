@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: "ollama"
   application:
     name: chat-server
   datasource:
@@ -8,22 +10,6 @@ spring:
     driver-class-name: org.postgresql.Driver
   flyway:
     enabled: true
-  ai:
-    ollama:
-      base-url: "http://localhost:11434"
-      init:
-        pull-model-strategy: "always"
-      chat:
-        enabled: true
-        options:
-          model: "mistral:7b-instruct-v0.3-q8_0"
-      embedding:
-        enabled: true
-        model: "nomic-embed-text"
-    vectorstore:
-      pgvector:
-        dimensions: 768
-        initialize-schema: true
 
 server:
   port: 8080
