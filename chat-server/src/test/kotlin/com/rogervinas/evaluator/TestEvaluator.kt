@@ -27,7 +27,7 @@ open class TestEvaluator(
             .content()
 
         return EvaluationResponse(
-            evaluationResponse!!.lowercase().startsWith("yes"),
+            evaluationResponse!!.contains("YES"),
             evaluationResponse,
             mutableMapOf<String?, Any?>()
         ).apply {

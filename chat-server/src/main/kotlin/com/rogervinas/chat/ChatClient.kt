@@ -25,6 +25,7 @@ class ChatClientConfiguration {
         If there is no information, then return a polite response suggesting you don't know.
         If the response involves a timestamp, be sure to convert it to something human-readable.
         Do not include any indication of what you're thinking.
+        Use the tools available to you to answer the questions.
         Just give the answer.
         """.trimIndent()
         return builder

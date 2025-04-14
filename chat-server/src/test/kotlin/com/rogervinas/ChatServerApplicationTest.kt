@@ -11,8 +11,6 @@ import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
-import org.junit.jupiter.api.TestInstance
-import org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS
 import org.junit.jupiter.api.TestMethodOrder
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
@@ -37,16 +35,18 @@ import java.util.UUID
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @ActiveProfiles("test", "ollama")
-@TestInstance(PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @Testcontainers
 class ChatServerApplicationTest {
 
-    @Container
-    val container = ComposeContainer(File("docker-compose.yml"))
-        .withLocalCompose(true)
-        .withExposedService("vectordb", 5432, forLogMessage(".*database system is ready to accept connections.*", 1))
-        .withExposedService("ollama", 11434, forLogMessage(".*llama runner started.*", 1))
+    companion object {
+        @Container
+        @JvmStatic
+        val container = ComposeContainer(File("docker-compose.yml"))
+            .withLocalCompose(true)
+            .withExposedService("vectordb", 5432, forLogMessage(".*database system is ready to accept connections.*", 1))
+            .withExposedService("ollama", 11434, forLogMessage(".*inference compute.*", 1))
+    }
 
     @Autowired
     lateinit var chatClientBuilder: ChatClient.Builder
@@ -66,15 +66,15 @@ class ChatServerApplicationTest {
     @ParameterizedTest
     @CsvSource(
         value = [
-            "yesterday, 2025-04-14",
-            "today, 2025-04-15",
-            "tomorrow, 2025-04-16",
+            "yesterday, was, 2025-04-14",
+            "today, is, 2025-04-15",
+            "tomorrow, will be, 2025-04-16",
         ]
     )
     @Order(1)
-    fun `should use clock tool`(date: String, expectedDate: LocalDate) {
+    fun `should use clock tool`(date: String, be: String, expectedDate: String) {
         val chatId = UUID.randomUUID().toString()
-        val chatResponse = chatService.chat(chatId, "What day is $date?")
+        val chatResponse = chatService.chat(chatId, "What day $be $date?")
 
         val evaluationResult = TestEvaluator(chatClientBuilder) { evaluationRequest, userSpec ->
             userSpec.text(
@@ -90,7 +90,7 @@ class ChatServerApplicationTest {
             )
                 .param("answer", evaluationRequest.responseContent)
                 .param("claim", evaluationRequest.userText)
-        }.evaluate(EvaluationRequest("$date is $expectedDate", chatResponse))
+        }.evaluate(EvaluationRequest("$date $be $expectedDate", chatResponse))
 
         assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
     }

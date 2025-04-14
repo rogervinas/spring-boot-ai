@@ -127,3 +127,79 @@ TERRIBLEEEEEE
 2025-04-14T20:09:30.515+02:00  INFO 18318 --- [chat-server] [    Test worker] com.rogervinas.evaluator.TestEvaluator   : Evaluation isPass=false feedback=NO
 
 The answer states that yesterday would be "April 14, 2025", which is not formatted as "2025-04-14" as mentioned in the claim. While the date information is the same, the formatting is different. The answer uses the format "Month Day, Year" (April 14, 2025) while the claim refers to the ISO format "Year-Month-Day" (2025-04-14). Since the claim specifically mentions "ignoring formatting," and the date information is correct despite the different format, I should have answered YES instead.
+
+
+# llama3.2:1b
+
+2025-04-15T00:41:03.093+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.tools.ClockTool           : Get date 2025-04-15
+2025-04-15T00:41:07.550+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #da032ec6-7fd3-4c25-8440-789f59361640 question: What day was yesterday?
+2025-04-15T00:41:07.551+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #da032ec6-7fd3-4c25-8440-789f59361640 answer: I don't have information on the weather in Nice, France today.
+
+You can try checking a different source for the current weather conditions in Nice.
+2025-04-15T00:41:15.490+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.evaluator.TestEvaluator   : Evaluation isPass=false feedback=I cannot provide an answer that contains inaccurate or misleading information. The claim that "yesterday was 2025-04-14" is likely incorrect, as April only has 30 days and does not have a 14th day.
+
+However, I can evaluate the given statement by checking if it matches the claim.
+
+The statement says: "I don't have information on the weather in Nice, France today." This suggests that the AI agent's current response is based on an outdated or unverified source of information.
+
+Since the AI agent does not have access to real-time information and a different source may provide more up-to-date information about the current weather conditions in Nice, I would return "NO" because the answer given by the AI agent does not match the claim.
+
+I couldn't find any information on the current date or time, so I couldn't evaluate the relevance of the statement "yesterday was 2025-04-14".
+
+--
+
+2025-04-15T00:41:22.708+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #480a6e2b-77e3-4936-b223-460679f5733e question: What day is today?
+2025-04-15T00:41:22.708+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #480a6e2b-77e3-4936-b223-460679f5733e answer: {"type":"function","function":{"name":"getDate","parameters":"{}"}}
+2025-04-15T00:41:34.627+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.evaluator.TestEvaluator   : Evaluation isPass=false feedback=```python
+def evaluate_answer(answer, claim):
+try:
+# Try to parse the answer and claim into datetime objects
+from datetime import datetime
+
+        answer_datetime = datetime.strptime(str(answer), "%Y-%m-%d")
+        claim_datetime = datetime.strptime(str(claim), "%Y-%m-%d")
+        
+        # Check if the dates match (ignoring any potential differences in year, month, day)
+        if answer_datetime.year == claim_datetime.year and 
+           answer_datetime.month == claim_datetime.month and 
+           answer_datetime.day == claim_datetime.day:
+            return "YES"
+        else:
+            return "NO"
+    except ValueError:
+        # If the provided date is not a string or does not match the format, do not compare
+        return "NOT PROVIDED"
+
+# Example usage:
+answer = {"type": "function", "name": "getDate", "parameters": {}}  # This should be today's date when evaluated correctly
+claim = "2025-04-15"
+print(evaluate_answer(answer, claim))  # Should print: YES
+
+answer = {"type": "function", "name": "getDate", "parameters": {}}  # If the answer is a wrong type or value, evaluate as NOT PROVIDED
+claim = "2025-02-14"
+print(evaluate_answer(answer, claim))  # Should print: NO
+```
+
+--
+
+2025-04-15T00:41:42.359+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.tools.ClockTool           : Get date 2025-04-15
+2025-04-15T00:41:47.307+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #a5dbc90b-796c-41e4-94bc-845d7fe61dbc question: What day will be tomorrow?
+2025-04-15T00:41:47.307+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #a5dbc90b-796c-41e4-94bc-845d7fe61dbc answer: It looks like we don't have any information about tomorrow. We're a few months away from that date. Would you like me to suggest some options for places you could visit in the next week or month?
+2025-04-15T00:41:54.900+02:00  INFO 50526 --- [chat-server] [    Test worker] com.rogervinas.evaluator.TestEvaluator   : Evaluation isPass=false feedback=After evaluating the answer, I would return:
+
+NO
+
+The claim is "tomorrow will be 2025-04-16", but the response provided by the AI agent states "It looks like we don't have any information about tomorrow. We're a few months away from that date." This indicates that the agent does not believe the claim is accurate, and instead suggests exploring other options for visiting places in the next week or month.
+
+The reason for this mismatch is that the agent is providing a rational explanation based on its understanding of time, rather than simply accepting the claimed date. The AI agent's response is attempting to provide more context and information about why the claim might not be true (i.e., it being "a few months away"), which is consistent with evaluating claims based on factual evidence.
+
+--
+
+# llama3.1:8b-instruct-q8_0
+
+2025-04-15T01:06:20.156+02:00  INFO 52050 --- [chat-server] [    Test worker] com.rogervinas.tools.ClockTool           : Get date 2025-04-15
+2025-04-15T01:06:44.753+02:00  INFO 52050 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #30c34ad9-4599-4c7d-bf57-51152432a52a question: What day was yesterday?
+2025-04-15T01:06:44.754+02:00  INFO 52050 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #30c34ad9-4599-4c7d-bf57-51152432a52a answer: Yesterday was April 14th, 2025.
+2025-04-15T01:07:00.651+02:00  INFO 52050 --- [chat-server] [    Test worker] com.rogervinas.evaluator.TestEvaluator   : Evaluation isPass=false feedback=NO
+The reason for this is that although the date mentioned in both answer and claim are the same (April 14th, 2025), the claim also specifies the year as 2025 which is not explicitly stated in the answer.
+

@@ -7,7 +7,7 @@ spring:
       chat:
         enabled: true
         options:
-          model: "mistral"
+          model: "llama3.1:8b"
       embedding:
         enabled: true
         model: "nomic-embed-text"
