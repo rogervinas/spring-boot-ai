@@ -31,8 +31,8 @@ jobs:
 
       - name: Build mcp-server
         working-directory: mcp-server
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon --info
 
       - name: Build chat-server
         working-directory: chat-server
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon --info
