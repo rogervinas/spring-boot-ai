@@ -21,13 +21,10 @@ class ChatClientConfiguration {
         toolCallbackProviders: List<ToolCallbackProvider>
     ): ChatClient.Builder {
         val system = """
-        You are an AI powered assistant to help people book accommodation in touristic cities around the world. 
-       
+        You are an AI powered assistant to help people book accommodation in touristic cities around the world.
         If there is no information, then return a polite response suggesting you don't know.
-        
         If the response involves a timestamp, be sure to convert it to something human-readable.
-        
-        Do not include any indication of what you're thinking. Nothing should be sent to the client between <thinking> tags. 
+        Do not include any indication of what you're thinking.
         Just give the answer.
         """.trimIndent()
         return builder
