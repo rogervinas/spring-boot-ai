@@ -1,5 +1,6 @@
 package com.rogervinas.chat
 
+import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor
 import org.springframework.ai.chat.client.advisor.QuestionAnswerAdvisor
@@ -12,6 +13,7 @@ import java.util.concurrent.ConcurrentHashMap
 @Service
 class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) {
 
+    private val logger = LoggerFactory.getLogger(ChatService::class.java)
     private val questionAnswerAdvisor = QuestionAnswerAdvisor(vectorStore)
     private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
     private val chatMemory = ConcurrentHashMap<String, PromptChatMemoryAdvisor>()
@@ -25,7 +27,10 @@ class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) 
             .user(question)
             .advisors(questionAnswerAdvisor, chatMemoryAdvisor, simpleLoggerAdvisor)
             .call()
-            .content()
+            .content().apply {
+                logger.info("Chat #$chatId question: $question")
+                logger.info("Chat #$chatId answer: $this")
+            }
     }
 }
 

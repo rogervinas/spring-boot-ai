@@ -1,5 +1,6 @@
 package com.rogervinas.tools
 
+import org.slf4j.LoggerFactory
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.ai.tool.method.MethodToolCallbackProvider
@@ -27,6 +28,10 @@ class WeatherTool(private val weatherService: WeatherService) {
 
 @Service
 class WeatherService {
-    fun getWeather(city: String, date: LocalDate): String =
-        "The weather in $city on $date is sunny with a high of 25°C"
+    private val logger = LoggerFactory.getLogger(WeatherService::class.java)
+
+    fun getWeather(city: String, date: LocalDate): String {
+        logger.info("Get weather for $city on $date")
+        return "The weather in $city on $date is sunny with a high of 25°C"
+    }
 }

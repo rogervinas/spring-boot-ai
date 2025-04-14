@@ -1,6 +1,5 @@
-package com.rogervinas
+package com.rogervinas.configuration
 
-import com.rogervinas.tools.WeatherTool
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.ai.tool.method.MethodToolCallbackProvider

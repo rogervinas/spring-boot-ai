@@ -1,5 +1,6 @@
 package com.rogervinas.tools
 
+import org.slf4j.LoggerFactory
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.ai.tool.method.MethodToolCallbackProvider
@@ -30,6 +31,10 @@ class BookingTool(private val bookingService: BookingService) {
 
 @Service
 class BookingService {
-    fun book(city: String, checkinDate: LocalDate, checkoutDate: LocalDate): String =
-        "Your accommodation has been booked in $city from $checkinDate to $checkoutDate"
+    private val logger = LoggerFactory.getLogger(BookingService::class.java)
+
+    fun book(city: String, checkinDate: LocalDate, checkoutDate: LocalDate): String {
+        logger.info("Book accommodation in $city from $checkinDate to $checkoutDate")
+        return "Your accommodation has been booked in $city from $checkinDate to $checkoutDate"
+    }
 }

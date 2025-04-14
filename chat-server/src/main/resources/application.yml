@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: "ollama"
+    active: "bedrock"
   application:
     name: chat-server
   datasource:
@@ -17,4 +17,4 @@ booking-server:
 
 logging:
   level:
-    org.springframework.ai.chat.client.advisor.SimpleChatClientAdvisor: DEBUG
+    org.springframework.ai.chat.client.advisor: INFO

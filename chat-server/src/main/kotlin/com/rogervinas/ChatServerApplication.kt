@@ -26,8 +26,9 @@ class VectorStoreConfiguration {
         jdbcTemplate: JdbcTemplate,
         objectMapper: ObjectMapper
     ) = ApplicationRunner {
-        if (isVectorStoreEmpty(jdbcTemplate)) {
-            val logger = LoggerFactory.getLogger(ChatServerApplication::class.java)
+        val logger = LoggerFactory.getLogger(ChatServerApplication::class.java)
+        val vectorStoreCount = vectorStoreCount(jdbcTemplate)
+        if (vectorStoreCount == 0) {
             logger.info("Initializing vector store ...")
             val cities = ClassPathResource("cities.json").inputStream.use {
                 objectMapper.readValue(it, Array<City>::class.java).toList()
@@ -36,12 +37,14 @@ class VectorStoreConfiguration {
                 val document = Document("name: ${city.name} country: ${city.country} description: ${city.description}")
                 vectorStore.add(listOf(document))
             }
-            logger.info("Vector store initialized with ${cities.size} documents")
+            logger.info("Vector store initialized with ${cities.size} cities")
+        } else {
+            logger.info("Vector store already contains $vectorStoreCount cities")
         }
     }
 
-    private fun isVectorStoreEmpty(jdbcTemplate: JdbcTemplate) =
-        jdbcTemplate.queryForObject("SELECT COUNT(*) FROM vector_store", Int::class.java) == 0
+    private fun vectorStoreCount(jdbcTemplate: JdbcTemplate) =
+        jdbcTemplate.queryForObject("SELECT COUNT(*) FROM vector_store", Int::class.java)
 }
 
 fun main(args: Array<String>) {
