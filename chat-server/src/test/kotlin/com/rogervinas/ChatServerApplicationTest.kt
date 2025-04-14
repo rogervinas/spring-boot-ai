@@ -32,7 +32,7 @@ import java.util.UUID
 
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("test", "bedrock")
+@ActiveProfiles("test", "ollama")
 @TestInstance(PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @Testcontainers
