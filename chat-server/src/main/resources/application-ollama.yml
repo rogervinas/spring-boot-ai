@@ -7,7 +7,7 @@ spring:
       chat:
         enabled: true
         options:
-          model: "mistral:7b-instruct-v0.3-q8_0"
+          model: "mistral"
       embedding:
         enabled: true
         model: "nomic-embed-text"
