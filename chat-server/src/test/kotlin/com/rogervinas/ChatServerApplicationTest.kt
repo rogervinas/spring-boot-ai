@@ -25,7 +25,11 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
+import org.testcontainers.containers.ComposeContainer
+import org.testcontainers.containers.wait.strategy.Wait.forLogMessage
+import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
+import java.io.File
 import java.time.Clock
 import java.time.LocalDate
 import java.util.UUID
@@ -37,6 +41,12 @@ import java.util.UUID
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @Testcontainers
 class ChatServerApplicationTest {
+
+    @Container
+    val container = ComposeContainer(File("docker-compose.yml"))
+        .withLocalCompose(true)
+        .withExposedService("vectordb", 5432, forLogMessage(".*database system is ready to accept connections.*", 1))
+        .withExposedService("ollama", 11434, forLogMessage(".*llama runner started.*", 1))
 
     @Autowired
     lateinit var chatClientBuilder: ChatClient.Builder

@@ -34,6 +34,7 @@ class VectorStoreConfiguration {
                 objectMapper.readValue(it, Array<City>::class.java).toList()
             }
             cities.forEach { city ->
+                logger.info("Adding ${city.name} to vector store ...")
                 val document = Document("name: ${city.name} country: ${city.country} description: ${city.description}")
                 vectorStore.add(listOf(document))
             }

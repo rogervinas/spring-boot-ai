@@ -1,5 +1,6 @@
 package com.rogervinas.tools
 
+import org.slf4j.LoggerFactory
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.method.MethodToolCallbackProvider
 import org.springframework.context.annotation.Bean
@@ -21,6 +22,12 @@ class ClockToolConfiguration {
 
 @Service
 class ClockTool(private val clock: Clock) {
+    private val logger = LoggerFactory.getLogger(ClockTool::class.java)
+
     @Tool(description = "get the current date")
-    fun getDate(): LocalDate = LocalDate.now(clock)
+    fun getDate(): LocalDate {
+        return LocalDate.now(clock).apply {
+            logger.info("Get date $this")
+        }
+    }
 }
