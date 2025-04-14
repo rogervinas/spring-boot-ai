@@ -10,5 +10,7 @@ services:
 
   ollama:
     image: ollama/ollama:0.6.5
+    volumes:
+      - ./.ollama:/root/.ollama
     ports:
       - "11434:11434"

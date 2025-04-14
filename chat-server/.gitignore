@@ -1,4 +1,5 @@
 .idea
 .kotlin
 .gradle
+.ollama
 build
