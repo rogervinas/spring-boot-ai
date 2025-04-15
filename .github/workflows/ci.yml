@@ -15,11 +15,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ollama prepare cache
+        run: |
+          mkdir -p ./chat-server/.ollama
+          ls -lR ./chat-server/.ollama
+
       - name: Ollama cache
         uses: actions/cache@v4
         with:
           path: ./chat-server/.ollama
-          key: ollama-${{ runner.os }}-${{ hashFiles('chat-server/.ollama/models/manifests/**') }}
+          key: ollama-${{ runner.os }}-${{ hashFiles('./chat-server/.ollama/models/manifests/**') }}
           restore-keys: |
             ollama-${{ runner.os }}-
 
