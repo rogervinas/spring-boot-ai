@@ -9,13 +9,13 @@
 In this example, inspired by [Building Agents with AWS: Complete Tutorial](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring Boot AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like:
 * [Chat Client API](https://docs.spring.io/spring-ai/reference/api/chatclient.html) and its [Advisors](https://docs.spring.io/spring-ai/reference/api/advisors.html)
 * Model Context Protocol ([MCP](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-overview.html))
-* Retrieval-Augmented Generation ([RAG](https://docs.spring.io/spring-ai/reference/api/retrieval-augmented-generation.html))
+* Retrieval Augmented Generation ([RAG](https://docs.spring.io/spring-ai/reference/api/retrieval-augmented-generation.html))
 
 We will use [Ollama](https://ollama.com/), which will hopefully let us run a local LLM without too much struggle 😮‍💨 or heavy hardware requirements. The application will be tested using [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html), and we will set up CI to run these tests automatically.
 
 The application features an AI agent that helps users book accommodations in tourist destinations.
 
-Through MCP, the agent can use the following tools:
+Through **MCP**, the agent can use the following tools:
 * **Clock Tool**: Provides the current date.
 * **Weather Tool**: Retrieves weather information for a specific city and date.
 * **Booking Tool**: Books accommodations in a city for a specific date.
@@ -96,7 +96,7 @@ The **Chat Server** is a Spring Boot application built with the following depend
   * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
   * **PromptChatMemoryAdvisor** - adds conversation history to the user input (chat memory)
   * **SimpleLoggerAdvisor** - logs the chat history to the console (for debugging)
-* **ChatController** - exposes a simple REST POST endpoint that takes user input, calls the ChatService, and returns the AI agent’s response
+* **ChatController** - exposes a simple REST POST endpoint that takes user input, calls the **ChatService**, and returns the AI agent’s response
 
 Let's implement this step by step ...
 
@@ -266,8 +266,8 @@ logging:
     org.springframework.ai.chat.client.advisor: INFO
 ```
 
-In the `ollama` profile configuration file, `application-ollama.yml`, we configure Spring AI to use **Ollama** models:
-* Set the base URL for the **Ollama** server to `http://localhost:11434`.
+In the `ollama` profile configuration file, `application-ollama.yml`, we configure Spring AI to use Ollama models:
+* Set the base URL for the Ollama server to `http://localhost:11434`.
 * Set the chat model to [llama3.1:8b](https://ollama.com/library/llama3.1:8b) (must be a **tools**-enabled model).
 * Set the embedding model to [nomic-embed-text](https://ollama.com/library/nomic-embed-text).
 * Use `pull-model-strategy: when_missing` to only pull models if they are not available locally.
@@ -299,6 +299,8 @@ TODO
 
 ## Run
 
+We run Ollama locally using `docker compose` but you can also install it natively on your machine.
+
 1. Start MCP server
 ```shell
 cd mcp-server
@@ -306,6 +308,7 @@ cd mcp-server
 ```
 
 2. Start docker compose
+
 ```shell
 cd chat-server
 docker compose up -d
@@ -329,6 +332,12 @@ curl -X POST "http://localhost:8080/2/chat" \
 curl -X POST "http://localhost:8080/2/chat" \
 -H "Content-Type: application/x-www-form-urlencoded" \
 -d "question=How is the weather like in Madrid for the weekend?"
+```
+
+```shell
+curl -X POST "http://localhost:8080/2/chat" \
+-H "Content-Type: application/x-www-form-urlencoded" \
+-d "question=Can I get a hotel for Berlin next monday for two nights?"
 ```
 
 ## Other AI models
