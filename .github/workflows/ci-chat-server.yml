@@ -1,4 +1,4 @@
-name: CI
+name: chat-server
 
 on:
   push:
