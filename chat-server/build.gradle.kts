@@ -26,6 +26,7 @@ repositories {
 val springAiVersion = "1.0.0-M6"
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.ai:spring-ai-mcp-client-spring-boot-starter")
 
     // ollama
@@ -37,8 +38,6 @@ dependencies {
 
     implementation("org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter")
     runtimeOnly("org.postgresql:postgresql")
-
-    implementation("org.springframework.boot:spring-boot-starter-web")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
