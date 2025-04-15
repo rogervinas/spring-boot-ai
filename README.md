@@ -11,7 +11,7 @@ In this example, inspired by [Building Agents with AWS: Complete Tutorial](https
 * Model Context Protocol ([MCP](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-overview.html))
 * Retrieval-Augmented Generation ([RAG](https://docs.spring.io/spring-ai/reference/api/retrieval-augmented-generation.html))
 
-We will use [Ollama](https://ollama.com/), which will hopefully let us run a local LLM without too much struggle or heavy hardware requirements. The application will be tested using [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html), and we will set up CI to run these tests automatically.
+We will use [Ollama](https://ollama.com/), which will hopefully let us run a local LLM without too much struggle 😮‍💨 or heavy hardware requirements. The application will be tested using [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html), and we will set up CI to run these tests automatically.
 
 The application features an AI agent that helps users book accommodations in tourist destinations.
 
