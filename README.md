@@ -1,3 +1,9 @@
+[![SpringBoot](https://github.com/rogervinas/spring-boot-ai/actions/workflows/ci.yml/badge.svg)](https://github.com/rogervinas/spring-boot-ai/actions/workflows/ci.yml)
+![Java](https://img.shields.io/badge/Java-21-blue?labelColor=black)
+![Kotlin](https://img.shields.io/badge/Kotlin-2.x-blue?labelColor=black)
+![SpringBoot](https://img.shields.io/badge/SpringBoot-3.x-blue?labelColor=black)
+![SpringAI](https://img.shields.io/badge/SpringAI-1.0.0--M6-blue?labelColor=black)
+
 # Spring Boot AI
 
 In this example, inspired by [Building Agents with AWS: Complete Tutorial (Java, Spring AI, Amazon Bedrock & MCP)](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring Boot AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like:
@@ -7,12 +13,14 @@ In this example, inspired by [Building Agents with AWS: Complete Tutorial (Java,
 
 We will use [Ollama](https://ollama.com/), which will hopefully let us run a local LLM without too much struggle or heavy hardware requirements. The application will be tested using [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html), and we will set up CI to run these tests automatically.
 
-The application features an AI agent that helps users book accommodations in tourist destinations. Through MCP, the agent can use the following tools:
+The application features an AI agent that helps users book accommodations in tourist destinations.
+
+Through MCP, the agent can use the following tools:
 * **Clock Tool**: Provides the current date.
 * **Weather Tool**: Retrieves weather information for a specific city and date.
 * **Booking Tool**: Books accommodations in a city for a specific date.
 
-The Clock and Weather tools will be implemented locally using MCP, while the Booking tool will be provided by a remote MCP server. Additional information about cities will be retrieved from a vector store using RAG.
+The **Clock** and **Weather** tools will be implemented locally using **MCP**, while the **Booking** tool will be provided by a remote **MCP server**. Additional information about cities will be retrieved from a vector store using **RAG**.
 
 ![Diagram](.doc/diagram.png)
 
