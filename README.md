@@ -203,3 +203,19 @@ The reason for this mismatch is that the agent is providing a rational explanati
 2025-04-15T01:07:00.651+02:00  INFO 52050 --- [chat-server] [    Test worker] com.rogervinas.evaluator.TestEvaluator   : Evaluation isPass=false feedback=NO
 The reason for this is that although the date mentioned in both answer and claim are the same (April 14th, 2025), the claim also specifies the year as 2025 which is not explicitly stated in the answer.
 
+-- 
+
+2025-04-15T01:38:30.032+02:00  INFO 55513 --- [chat-server] [    Test worker] com.rogervinas.tools.ClockTool           : Get date 2025-04-15
+2025-04-15T01:39:06.595+02:00  INFO 55513 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #5667fd8c-592d-42fe-a875-387830ef7638 question: What day was yesterday?
+2025-04-15T01:39:06.596+02:00  INFO 55513 --- [chat-server] [    Test worker] com.rogervinas.chat.ChatService          : Chat #5667fd8c-592d-42fe-a875-387830ef7638 answer: Yesterday was April 14th.
+2025-04-15T01:40:40.690+02:00  INFO 55513 --- [chat-server] [    Test worker] com.rogervinas.evaluator.TestEvaluator   : Evaluation isPass=true feedback=Since I'm a large language model, I don't have real-time access to the current date. However, I can evaluate the claim and answer based on their content.
+
+The claim states that "yesterday was 2025-04-14". This implies that today's date is April 15th, 2025 (or any future date where April 14th is yesterday).
+
+The answer given by the AI agent states that "Yesterday was April 14th". This implies that today's date is April 15th (not necessarily in the year 2025).
+
+Since the claim and answer both imply that today is April 15th, but with an unspecified year, I would say:
+
+YES
+
+The reason for this is that both the claim and answer agree on the day of the week (yesterday was April 14th), and only differ in the specific date format. If we were to ignore date formatting differences, as per your instructions, we would be left with "April 14th" being yesterday in both cases.
