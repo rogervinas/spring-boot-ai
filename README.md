@@ -1,6 +1,9 @@
 # Spring Boot AI
 
-In this example, inspired by [Building Agents with AWS: Complete Tutorial (Java, Spring AI, Amazon Bedrock & MCP)](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring Boot AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like the [Chat Client API](https://docs.spring.io/spring-ai/reference/api/chatclient.html) and its [Advisors](https://docs.spring.io/spring-ai/reference/api/advisors.html), Model Context Protocol ([MCP](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-overview.html)), and Retrieval-Augmented Generation ([RAG](https://docs.spring.io/spring-ai/reference/api/retrieval-augmented-generation.html)).
+In this example, inspired by [Building Agents with AWS: Complete Tutorial (Java, Spring AI, Amazon Bedrock & MCP)](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring Boot AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like:
+* [Chat Client API](https://docs.spring.io/spring-ai/reference/api/chatclient.html) and its [Advisors](https://docs.spring.io/spring-ai/reference/api/advisors.html)
+* Model Context Protocol ([MCP](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-overview.html))
+* Retrieval-Augmented Generation ([RAG](https://docs.spring.io/spring-ai/reference/api/retrieval-augmented-generation.html)).
 
 We will use [Ollama](https://ollama.com/), which will hopefully let us run a local LLM without too much struggle or heavy hardware requirements. The application will be tested using [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html), and we will set up CI to run these tests automatically.
 
