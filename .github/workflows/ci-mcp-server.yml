@@ -1,0 +1,32 @@
+name: mcp-server
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - .github/workflows/ci-mcp-server.yml
+      - mcp-server/**
+  pull_request:
+    branches: [ main ]
+    paths:
+      - .github/workflows/ci-mcp-server.yml
+      - mcp-server/**
+
+jobs:
+  build:
+    name: build
+    runs-on: ubuntu-latest
+    steps:
+
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+
+      - name: Build
+        working-directory: mcp-server
+        run: ./gradlew build --no-daemon
