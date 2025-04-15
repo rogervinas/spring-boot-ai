@@ -1,4 +1,4 @@
-name: mcp-server
+name: CI
 
 on:
   push:
