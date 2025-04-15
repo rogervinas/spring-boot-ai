@@ -7,3 +7,10 @@ services:
       - POSTGRES_PASSWORD=password
     ports:
       - "5432:5432"
+
+  ollama:
+    image: ollama/ollama:0.6.5
+    volumes:
+      - ./.ollama:/root/.ollama
+    ports:
+      - "11434:11434"

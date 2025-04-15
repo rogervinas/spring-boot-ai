@@ -1,4 +1,6 @@
 spring:
+  profiles:
+    active: "ollama"
   application:
     name: chat-server
   datasource:
@@ -6,30 +8,13 @@ spring:
     username: "postgres"
     password: "password"
     driver-class-name: org.postgresql.Driver
-  flyway:
-    enabled: true
-  ai:
-    bedrock:
-      aws:
-        access-key: "${AWS_ACCESS_KEY_ID}"
-        secret-key: "${AWS_SECRET_ACCESS_KEY}"
-        region: "${AWS_REGION}"
-      converse:
-        chat:
-          enabled: true
-          options:
-            model: "xxx"
-      cohere:
-        embedding:
-          enabled: true
-          model: "xxx"
-    vectorstore:
-      pgvector:
-        dimensions: 1024
-        initialize-schema: true
 
 server:
   port: 8080
 
-mcp-server:
+booking-server:
   url: "http://localhost:8081"
+
+logging:
+  level:
+    org.springframework.ai.chat.client.advisor: INFO

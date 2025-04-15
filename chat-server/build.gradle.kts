@@ -1,3 +1,7 @@
+import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
+import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
+
 plugins {
     val kotlinVersion = "2.1.20"
     kotlin("jvm") version kotlinVersion
@@ -20,20 +24,20 @@ repositories {
 }
 
 val springAiVersion = "1.0.0-M6"
-val flywayVersion = "11.6.0"
 
 dependencies {
     implementation("org.springframework.ai:spring-ai-mcp-client-spring-boot-starter")
-    implementation("org.springframework.ai:spring-ai-bedrock-converse-spring-boot-starter")
-    implementation("org.springframework.ai:spring-ai-bedrock-ai-spring-boot-starter")
+
+    // ollama
+    implementation("org.springframework.ai:spring-ai-ollama-spring-boot-starter")
+
+    // bedrock
+    // implementation("org.springframework.ai:spring-ai-bedrock-converse-spring-boot-starter")
+    // implementation("org.springframework.ai:spring-ai-bedrock-ai-spring-boot-starter")
 
     implementation("org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("org.flywaydb:flyway-core:$flywayVersion")
-    implementation("org.flywaydb:flyway-database-postgresql:$flywayVersion")
-
-    implementation("org.springframework.boot:spring-boot-starter-data-jdbc")
     implementation("org.springframework.boot:spring-boot-starter-web")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -44,6 +48,12 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+    testImplementation("org.mockito:mockito-core:5.17.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.17.0")
+    testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
+
+    testImplementation("org.testcontainers:junit-jupiter:1.20.6")
 }
 
 dependencyManagement {
@@ -60,4 +70,7 @@ kotlin {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+    testLogging {
+        events(PASSED, SKIPPED, FAILED)
+    }
 }
