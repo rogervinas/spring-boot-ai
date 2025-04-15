@@ -11,7 +11,7 @@ The application features an AI agent that helps users book accommodations in tou
 
 The Clock and Weather tools will be implemented locally using MCP, while the Booking tool will be provided by a remote MCP server. Additional information about cities will be retrieved from a vector store using RAG.
 
-![Diagram](doc/diagram.png)
+![Diagram](.doc/diagram.png)
 
 ## Implementation
 
