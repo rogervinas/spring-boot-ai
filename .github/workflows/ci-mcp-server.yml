@@ -27,6 +27,7 @@ jobs:
           java-version: 21
           distribution: temurin
           cache: gradle
+          cache-dependency-path: mcp-server/build.gradle.kts
 
       - name: Build
         working-directory: mcp-server
