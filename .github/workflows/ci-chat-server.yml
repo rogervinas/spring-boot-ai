@@ -1,10 +1,16 @@
-name: CI
+name: chat-server
 
 on:
   push:
     branches: [ main ]
+    paths:
+      - .github/workflows/ci-chat-server.yml
+      - chat-server/**
   pull_request:
     branches: [ main ]
+    paths:
+      - .github/workflows/ci-chat-server.yml
+      - chat-server/**
 
 jobs:
   build:
@@ -28,12 +34,10 @@ jobs:
         with:
           java-version: 21
           distribution: temurin
+          cache: gradle
+          cache-dependency-path: chat-server/build.gradle.kts
 
-      - name: Build mcp-server
-        working-directory: mcp-server
-        run: ./gradlew build --no-daemon
-
-      - name: Build chat-server
+      - name: Build
         working-directory: chat-server
         run: ./gradlew build --no-daemon
 
