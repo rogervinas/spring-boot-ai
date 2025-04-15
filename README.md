@@ -1,6 +1,8 @@
 # Spring Boot AI
 
-Inspired by [Building Agents with AWS: Complete Tutorial (Java, Spring AI, Amazon Bedrock & MCP)](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV) and [spring-ai-java-bedrock-mcp-rag](https://github.com/aws-samples/Sample-Model-Context-Protocol-Demos/tree/main/modules/spring-ai-java-bedrock-mcp-rag)
+Inspired by [Building Agents with AWS: Complete Tutorial (Java, Spring AI, Amazon Bedrock & MCP)](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV)
+
+![Diagram](doc/diagram.png)
 
 ## Run locally
 
@@ -39,4 +41,4 @@ curl -X POST "http://localhost:8080/2/chat" \
 ## Documentation
 
 * [Spring Boot AI](https://docs.spring.io/spring-ai/reference/index.html)
-* 
+* Sample [spring-ai-java-bedrock-mcp-rag](https://github.com/aws-samples/Sample-Model-Context-Protocol-Demos/tree/main/modules/spring-ai-java-bedrock-mcp-rag)
