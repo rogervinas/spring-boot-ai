@@ -41,3 +41,5 @@ jobs:
         run: |
           ls -lR ./chat-server/src
           ls -lR ./chat-server/.ollama
+          sudo chown -R $USER:$USER ./chat-server/.ollama
+          ls -lR ./chat-server/.ollama
