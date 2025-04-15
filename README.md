@@ -24,6 +24,21 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
 
 ![Diagram](.doc/diagram.png)
 
+* [Implementation](#implementation)
+  * [MCP Server](#mcp-server)
+  * [Chat Server](#chat-server)
+    * [Components](#components)
+      * [Weather and Clock Tools (local)](#weather-and-clock-tools-local)
+      * [Booking Tool (remote)](#booking-tool-remote)
+      * [ChatClient](#chatclient)
+      * [ChatService](#chatservice)
+      * [ChatController](#chatcontroller)
+* [Configuration](#configuration)
+* [Test](#test)
+* [Run](#run)
+* [Other AI models](#other-ai-models)
+* [Documentation](#documentation)
+
 ## Implementation
 
 ### MCP Server
@@ -278,15 +293,11 @@ spring:
         initialize-schema: true
 ```
 
-## Use other AI models
+## Test
 
 TODO
 
-## Testing
-
-TODO
-
-## Run locally
+## Run
 
 1. Start MCP server
 ```shell
@@ -319,6 +330,13 @@ curl -X POST "http://localhost:8080/2/chat" \
 -H "Content-Type: application/x-www-form-urlencoded" \
 -d "question=How is the weather like in Madrid for the weekend?"
 ```
+
+## Other AI models
+
+To use a different [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by Spring AI, follow these steps:
+* Add the required dependencies
+* Configure the model in its own `application-<model>.yml` file
+* Activate the profile using `spring.profiles.active=<model>` in the main `application.yml` file
 
 ## Documentation
 
