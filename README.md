@@ -11,8 +11,9 @@ In this example, inspired by [Building Agents with AWS: Complete Tutorial](https
 * [Chat Client API](https://docs.spring.io/spring-ai/reference/api/chatclient.html) and its [Advisors](https://docs.spring.io/spring-ai/reference/api/advisors.html)
 * Model Context Protocol ([MCP](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-overview.html))
 * Retrieval Augmented Generation ([RAG](https://docs.spring.io/spring-ai/reference/api/retrieval-augmented-generation.html))
+* Testing with [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html) 🤩
 
-We will use [Ollama](https://ollama.com/), which will hopefully let us run a local LLM without too much struggle 😮‍💨 or heavy hardware requirements. The application will be tested using [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html), and we will set up CI to run these tests automatically.
+The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but one of the great things about Spring AI is that with just a few config tweaks and dependency changes, the same code works with any other supported model. In our case, we’ll use [Ollama](https://ollama.com/), which will hopefully 🙏 let us run locally and in CI without heavy hardware requirements.
 
 The application features an AI agent that helps users book accommodations in tourist destinations.
 
@@ -37,7 +38,7 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
 * [Configuration](#configuration)
 * [Test](#test)
 * [Run](#run)
-* [Other AI models](#other-ai-models)
+* [How to use other AI models](#how-to-use-other-ai-models)
 * [Documentation](#documentation)
 
 ## Implementation
@@ -341,7 +342,7 @@ curl -X POST "http://localhost:8080/2/chat" \
 -d "question=Can I get a hotel for Berlin next monday for two nights?"
 ```
 
-## Other AI models
+## How to use other AI models
 
 To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by Spring AI, follow these steps:
 * Add the required dependencies
