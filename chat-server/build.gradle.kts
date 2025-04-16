@@ -1,6 +1,7 @@
 import org.gradle.api.tasks.testing.logging.TestLogEvent.FAILED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.PASSED
 import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
+import java.util.Properties
 
 plugins {
     val kotlinVersion = "2.1.20"
@@ -72,5 +73,23 @@ tasks.withType<Test> {
     useJUnitPlatform()
     testLogging {
         events(PASSED, SKIPPED, FAILED)
+    }
+    setSystemProperties { systemProperty(it.first, it.second) }
+}
+
+tasks.withType<JavaExec> {
+    setSystemProperties { systemProperty(it.first, it.second) }
+}
+
+private fun setSystemProperties(setSystemProperty: (Pair<String, Any>) -> Unit) {
+    val systemPropertiesFile = project.rootProject.file("system.properties")
+    if (systemPropertiesFile.exists()) {
+        systemPropertiesFile.inputStream().use { inputStream ->
+            Properties().apply {
+                load(inputStream)
+            }.forEach {
+                setSystemProperty(it.key.toString() to it.value)
+            }
+        }
     }
 }
