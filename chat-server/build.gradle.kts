@@ -27,7 +27,7 @@ repositories {
 val springAiVersion = "1.0.0-M6"
 
 dependencies {
-    implementation("org.springframework.boot:spring-boot-starter-webflux")
+    implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.ai:spring-ai-mcp-client-spring-boot-starter")
 
     // ollama
@@ -45,7 +45,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
-    testImplementation("org.springframework.ai:spring-ai-mcp-server-webflux-spring-boot-starter")
 
     testImplementation(platform("org.junit:junit-bom:5.12.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
