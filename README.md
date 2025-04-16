@@ -84,25 +84,25 @@ The **Chat Server** is a Spring Boot application built with the following depend
 
 #### Components
 
-**MCP Tools**
-* **WeatherTool** - a local MCP tool that queries a **WeatherService** for the weather in a given city on a given date
-* **ClockTool** - a local MCP tool that returns the system date, letting us control the date the AI agent uses to avoid unpredictability
-* **BookingTool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
-
-**Chat**
-* **ChatClient** - a **Spring AI** ChatClient configured with:
-  * A system prompt to define the AI agent’s role
-  * The Ollama model autoconfigured by Spring Boot
-  * The above MCP tools as part of the AI agent’s toolset
-* **ChatService** - wraps the **ChatClient** and adds three advisors:
-  * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
-  * **PromptChatMemoryAdvisor** - adds conversation history to the user input (chat memory)
-  * **SimpleLoggerAdvisor** - logs the chat history to the console (for debugging)
-* **ChatController** - exposes a simple REST POST endpoint that takes user input, calls the **ChatService**, and returns the AI agent’s response
+* **MCP Tools**
+  * **WeatherTool** - a local MCP tool that queries a **WeatherService** for the weather in a given city on a given date
+  * **ClockTool** - a local MCP tool that returns the system date, letting us control the date the AI agent uses to avoid unpredictability
+  * **BookingTool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
+* **Chat**
+  * **ChatClient** - a **Spring AI** ChatClient configured with:
+    * A system prompt to define the AI agent’s role
+    * The Ollama model autoconfigured by Spring Boot
+    * The above MCP tools as part of the AI agent’s toolset
+  * **ChatService** - wraps the **ChatClient** and adds three advisors:
+    * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
+    * **PromptChatMemoryAdvisor** - adds conversation history to the user input (chat memory)
+    * **SimpleLoggerAdvisor** - logs the chat history to the console (for debugging)
+  * **ChatController** - exposes a simple REST POST endpoint that takes user input, calls the **ChatService**, and returns the AI agent’s response
+* **Vector Store Initializer** - loads some sample data into the vector store at startup
 
 Let's implement this step by step ...
 
-##### Weather and Clock Tools
+#### Weather and Clock Tools
 
 Here's how the **WeatherTool** is implemented (the same applies to **ClockTool**):
 
@@ -129,7 +129,7 @@ class WeatherToolConfiguration {
 }
 ```
 
-##### Booking Tool
+#### Booking Tool
 
 To set up the **BookingTool** as a remote MCP tool, we register a `SyncMcpToolCallbackProvider` using an `McpClient` configured with the remote MCP server URL:
 
@@ -150,7 +150,7 @@ class BookingToolConfiguration {
 
 For alternative ways to configure it, see the [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
 
-##### ChatClient
+#### ChatClient
 
 We create the **ChatClient** using **Spring AI**'s `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
 
@@ -184,7 +184,7 @@ class ChatClientConfiguration {
 }
 ```
 
-##### ChatService
+#### ChatService
 
 The **ChatService** exposes a single `chat` method that takes a chat ID and a user question. It calls the `ChatClient` with the user question along with a set of advisors to enrich the interaction:
 * **QuestionAnswerAdvisor** - retrieves relevant context from a vector store and injects it to the context (RAG)
@@ -221,7 +221,7 @@ class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) 
 }
 ```
 
-##### ChatController
+#### ChatController
 
 The **ChatController** exposes a simple REST POST endpoint that takes user input, calls the `ChatService`, and returns the AI agent’s response:
 
@@ -232,6 +232,22 @@ class ChatController(private val chatService: ChatService) {
     @PostMapping("/{chatId}/chat")
     fun chat(@PathVariable chatId: String, @RequestParam question: String): String? {
         return chatService.chat(chatId, question)
+    }
+}
+```
+
+#### Vector Store Initializer
+
+It's as simple as using **Spring AI**’s autoconfigured `VectorStore` and adding documents to it. This automatically invokes the embedding model to generate embeddings and store them in the vector store:
+
+```kotlin
+@Bean
+fun vectorStoreInitializer(vectorStore: VectorStore) = ApplicationRunner {
+    // TODO check if the vector store is empty ...
+    // TODO load cities from a JSON file or any other source ...
+    cities.forEach { city ->
+      val document = Document("name: ${city.name} country: ${city.country} description: ${city.description}")
+      vectorStore.add(listOf(document))
     }
 }
 ```
