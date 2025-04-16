@@ -40,6 +40,8 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter")
     runtimeOnly("org.postgresql:postgresql")
 
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
