@@ -324,6 +324,8 @@ cd chat-server
 
 4. Execute queries
 
+You can access the API at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) or use any HTTP client of your choice. Below are some examples using `curl`:
+
 ```shell
 curl -X POST "http://localhost:8080/2/chat" \
 -H "Content-Type: application/x-www-form-urlencoded" \
