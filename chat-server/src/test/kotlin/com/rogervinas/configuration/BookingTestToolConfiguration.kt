@@ -1,36 +1,23 @@
 package com.rogervinas.configuration
 
-import io.modelcontextprotocol.server.McpServer
-import io.modelcontextprotocol.server.McpSyncServer
-import io.modelcontextprotocol.server.transport.WebFluxSseServerTransport
-import org.springframework.ai.autoconfigure.mcp.server.McpServerProperties
-import org.springframework.ai.mcp.McpToolUtils
 import org.springframework.ai.tool.annotation.Tool
 import org.springframework.ai.tool.annotation.ToolParam
 import org.springframework.ai.tool.method.MethodToolCallbackProvider
-import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.stereotype.Service
 import java.time.LocalDate
 
 @Configuration
-@EnableConfigurationProperties(McpServerProperties::class)
-class McpTestServerConfiguration {
+class BookingTestToolConfiguration {
 
-    @Bean(destroyMethod = "close")
-    fun mcpTestServer(bookingTestService: BookingTestService, transport: WebFluxSseServerTransport): McpSyncServer {
-        val bookingTestToolRegistration = MethodToolCallbackProvider.builder()
-            .toolObjects(BookingTestTool(bookingTestService))
-            .build()
-            .toolCallbacks.map { McpToolUtils.toSyncToolRegistration(it) }
-
-        return McpServer
-            .sync(transport)
-            .tools(bookingTestToolRegistration)
-            .build()
-    }
+    @Bean
+    fun bookingToolCallbackProvider(bookingTestTool: BookingTestTool) = MethodToolCallbackProvider.builder()
+        .toolObjects(bookingTestTool)
+        .build()
 }
 
+@Service
 class BookingTestTool(private val bookingTestService: BookingTestService) {
     @Tool(
         description = "make a reservation for accommodation for a given city and date",

@@ -1,11 +1,5 @@
 spring:
   ai:
     mcp:
-      server:
+      client:
         enabled: false
-
-server:
-  port: ${random.int[10000,65535]}
-
-booking-server:
-  url: "http://localhost:${server.port}"
