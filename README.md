@@ -151,7 +151,7 @@ For alternative ways to configure it, see the [MCP Client Boot Starter](https://
 
 ##### ChatClient
 
-We create the **ChatClient** using Spring Boot AI's `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we’ll look at that later), and initialize it with a custom system prompt and the available MCP tools:
+We create the **ChatClient** using Spring Boot AI's `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
 
 ```kotlin
 @Configuration
