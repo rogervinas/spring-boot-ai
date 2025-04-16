@@ -77,7 +77,7 @@ class BookingToolConfiguration {
 
 The **Chat Server** is a Spring Boot application built with the following dependencies:
 * `org.springframework.boot:spring-boot-starter-web` - to expose a REST API for the chat interface
-* `org.springframework.ai:spring-ai-mcp-client-spring-boot-starter` - to use MCP tools and connect to MCP servers
+* `org.springframework.ai:spring-ai-mcp-client-spring-boot-starter` - to use MCP
 * `org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter` - to enable RAG with PGVector
 * `org.springframework.ai:spring-ai-ollama-spring-boot-starter` - to use Ollama models
 
