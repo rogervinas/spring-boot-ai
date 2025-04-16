@@ -317,7 +317,7 @@ spring:
 
 ### MCP Server
 
-To test the **MCP Server** we can use a `McpClient` and call the `book` method of the **BookingTool**, simplified below in 7 steps:
+To test the **MCP Server**, we use a `McpClient` to call the `book` method of the **BookingTool**, as shown in this simplified 7-step test:
 
 ```kotlin
 @SpringBootTest(webEnvironment = RANDOM_PORT)
