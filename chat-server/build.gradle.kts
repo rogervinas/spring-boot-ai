@@ -30,11 +30,11 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-mcp-client-spring-boot-starter")
 
     // ollama
-    implementation("org.springframework.ai:spring-ai-ollama-spring-boot-starter")
+    // implementation("org.springframework.ai:spring-ai-ollama-spring-boot-starter")
 
     // bedrock
-    // implementation("org.springframework.ai:spring-ai-bedrock-converse-spring-boot-starter")
-    // implementation("org.springframework.ai:spring-ai-bedrock-ai-spring-boot-starter")
+    implementation("org.springframework.ai:spring-ai-bedrock-converse-spring-boot-starter")
+    implementation("org.springframework.ai:spring-ai-bedrock-ai-spring-boot-starter")
 
     implementation("org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter")
     runtimeOnly("org.postgresql:postgresql")

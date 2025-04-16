@@ -1,0 +1,20 @@
+spring:
+  ai:
+    bedrock:
+      aws:
+        access-key: "${AWS_ACCESS_KEY_ID}"
+        secret-key: "${AWS_SECRET_ACCESS_KEY}"
+        region: "${AWS_REGION:eu-central-1}"
+      converse:
+        chat:
+          enabled: true
+          options:
+            model: "${AWS_BEDROCK_CHAT_MODEL}"
+      cohere:
+        embedding:
+          enabled: true
+          model: "${AWS_BEDROCK_EMBEDDING_MODEL}"
+    vectorstore:
+      pgvector:
+        dimensions: 1024
+        initialize-schema: true
