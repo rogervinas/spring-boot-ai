@@ -42,7 +42,7 @@ class McpServerApplicationTest {
 
     @AfterAll
     fun closeClient() {
-        client.closeGracefully()
+        client.close()
     }
 
     @MockitoBean

@@ -9,7 +9,6 @@ import java.time.Instant
 import java.time.ZoneOffset
 
 @Configuration
-@Profile("test")
 class ClockTestToolConfiguration {
 
     @Primary
