@@ -85,7 +85,7 @@ The **Chat Server** is a Spring Boot application built with the following depend
 
 **MCP Tools**
 * **WeatherTool** - a local MCP tool that queries a **WeatherService** for the weather in a given city on a given date
-* **ClockTool** - a local MCP tool that uses the system Clock to return the current date
+* **ClockTool** - a local MCP tool that returns the system date, letting us control the date the AI agent uses to avoid unpredictability
 * **BookingTool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
 
 **Chat**
@@ -343,7 +343,7 @@ curl -X POST "http://localhost:8080/2/chat" \
 
 ## Other AI models
 
-To use a different [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by Spring AI, follow these steps:
+To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by Spring AI, follow these steps:
 * Add the required dependencies
 * Configure the model in its own `application-<model>.yml` file
 * Activate the profile using `spring.profiles.active=<model>` in the main `application.yml` file
