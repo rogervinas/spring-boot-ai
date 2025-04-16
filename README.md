@@ -37,6 +37,8 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
       * [ChatController](#chatcontroller)
 * [Configuration](#configuration)
 * [Test](#test)
+  * [MCP Server](#mcp-server-1)
+  * [Chat Server](#chat-server-1)
 * [Run](#run)
 * [How to use other AI models](#how-to-use-other-ai-models)
 * [Documentation](#documentation)
@@ -198,7 +200,6 @@ Here’s the implementation:
 ```kotlin
 @Service // or @Bean / @Component
 class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) {
-
     private val logger = LoggerFactory.getLogger(ChatService::class.java)
     private val questionAnswerAdvisor = QuestionAnswerAdvisor(vectorStore)
     private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
@@ -228,7 +229,6 @@ The **ChatController** exposes a simple REST POST endpoint that takes user input
 ```kotlin
 @RestController
 class ChatController(private val chatService: ChatService) {
-
     @PostMapping("/{chatId}/chat")
     fun chat(@PathVariable chatId: String, @RequestParam question: String): String? {
         return chatService.chat(chatId, question)
@@ -251,6 +251,8 @@ fun vectorStoreInitializer(vectorStore: VectorStore) = ApplicationRunner {
     }
 }
 ```
+
+You can find the full version of `vectorStoreInitializer` in [ChatServerApplication.kt](chat-server/src/main/kotlin/com/rogervinas/ChatServerApplication.kt).
 
 ## Configuration
 
@@ -313,7 +315,72 @@ spring:
 
 ## Test
 
-TODO
+### MCP Server
+
+To test the **MCP Server** we can use a `McpClient` and call the `book` method of the **BookingTool**, simplified below in 7 steps:
+
+```kotlin
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+class McpServerApplicationTest {
+
+  // 1. Inject the server port (it is random)
+  @LocalServerPort
+  val port: Int = 0
+
+  // 2. Mock the BookingService instance
+  @MockitoBean
+  lateinit var bookingService: BookingService
+
+  @Test
+  fun `should book`() {
+    // 3. Create a McpClient connected to the server
+    val client = McpClient.sync(HttpClientSseClientTransport("http://localhost:$port")).build()
+    client.initialize()
+    client.ping()
+
+    // 4. Mock the bookingService using argument captors
+    val bookResult = "Booking is done!"
+    val cityCaptor = argumentCaptor<String>()
+    val checkinDateCaptor = argumentCaptor<LocalDate>()
+    val checkoutDateCaptor = argumentCaptor<LocalDate>()
+    doReturn(bookResult)
+      .whenever(bookingService)
+      .book(cityCaptor.capture(), checkinDateCaptor.capture(), checkoutDateCaptor.capture())
+
+    // 5. Call the tool
+    val city = "Barcelona"
+    val checkinDate = "2025-04-15"
+    val checkoutDate = "2025-04-18"
+    val result = client.callTool(CallToolRequest(
+      "book",
+      mapOf(
+        "city" to city,
+        "checkinDate" to checkinDate,
+        "checkoutDate" to checkoutDate
+      )
+    ))
+
+    // 6. Verify the result
+    assertThat(result.isError).isFalse()
+    assertThat(result.content).singleElement().isInstanceOfSatisfying(TextContent::class.java) {
+      // TODO why is text double quoted?
+      assertThat(it.text).isEqualTo("\"$bookResult\"")
+    }
+
+    // 7. Verify that the bookingService was called with the correct parameters
+    assertThat(cityCaptor.allValues).singleElement().isEqualTo(city)
+    assertThat(checkinDateCaptor.allValues).singleElement().isEqualTo(LocalDate.parse(checkinDate))
+    assertThat(checkoutDateCaptor.allValues).singleElement().isEqualTo(LocalDate.parse(checkoutDate))
+
+    // 8. Close the client
+    client.closeGracefully()
+  }
+}
+```
+
+For the full implementation (including a test that verifies the list of available tools), see [McpServerApplicationTest.kt](mcp-server/src/test/kotlin/com/rogervinas/McpServerApplicationTest.kt).
+
+### Chat Server
 
 ## Run
 
