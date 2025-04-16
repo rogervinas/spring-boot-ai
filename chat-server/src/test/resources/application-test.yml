@@ -1,0 +1,5 @@
+spring:
+  ai:
+    mcp:
+      client:
+        enabled: false
