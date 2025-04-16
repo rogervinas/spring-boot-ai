@@ -29,8 +29,8 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
   * [MCP Server](#mcp-server)
   * [Chat Server](#chat-server)
     * [Components](#components)
-      * [Weather and Clock Tools (local)](#weather-and-clock-tools-local)
-      * [Booking Tool (remote)](#booking-tool-remote)
+      * [Weather and Clock Tools](#weather-and-clock-tools)
+      * [Booking Tool](#booking-tool)
       * [ChatClient](#chatclient)
       * [ChatService](#chatservice)
       * [ChatController](#chatcontroller)
@@ -101,7 +101,7 @@ The **Chat Server** is a Spring Boot application built with the following depend
 
 Let's implement this step by step ...
 
-##### Weather and Clock Tools (local)
+##### Weather and Clock Tools
 
 Here's how the **WeatherTool** is implemented (the same applies to **ClockTool**):
 
@@ -128,7 +128,7 @@ class WeatherToolConfiguration {
 }
 ```
 
-##### Booking Tool (remote)
+##### Booking Tool
 
 To set up the **BookingTool** as a remote MCP tool, we register a `SyncMcpToolCallbackProvider` using an `McpClient` configured with the remote MCP server URL:
 
