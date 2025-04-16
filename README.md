@@ -7,13 +7,13 @@
 
 # Spring Boot AI
 
-In this example, inspired by [Building Agents with AWS: Complete Tutorial](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring Boot AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like:
+In this example, inspired by [Building Agents with AWS: Complete Tutorial](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like:
 * [Chat Client API](https://docs.spring.io/spring-ai/reference/api/chatclient.html) and its [Advisors](https://docs.spring.io/spring-ai/reference/api/advisors.html)
 * Model Context Protocol ([MCP](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-overview.html))
 * Retrieval Augmented Generation ([RAG](https://docs.spring.io/spring-ai/reference/api/retrieval-augmented-generation.html))
 * Testing with [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html) 🤩
 
-The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but one of the great things about Spring AI is that with just a few config tweaks and dependency changes, the same code works with any other supported model. In our case, we’ll use [Ollama](https://ollama.com/), which will hopefully 🙏 let us run locally and in CI without heavy hardware requirements.
+The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but one of the great things about **Spring AI** is that with just a few config tweaks and dependency changes, the same code works with any other supported model. In our case, we’ll use [Ollama](https://ollama.com/), which will hopefully 🙏 let us run locally and in CI without heavy hardware requirements.
 
 The application features an AI agent that helps users book accommodations in tourist destinations.
 
@@ -152,7 +152,7 @@ For alternative ways to configure it, see the [MCP Client Boot Starter](https://
 
 ##### ChatClient
 
-We create the **ChatClient** using Spring Boot AI's `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
+We create the **ChatClient** using Spring AI's `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
 
 ```kotlin
 @Configuration
@@ -351,5 +351,5 @@ To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/a
 
 ## Documentation
 
-* [Spring Boot AI](https://docs.spring.io/spring-ai/reference/index.html) documentation
+* [Spring AI](https://docs.spring.io/spring-ai/reference/index.html) documentation
 * Example project: [spring-ai-java-bedrock-mcp-rag](https://github.com/aws-samples/Sample-Model-Context-Protocol-Demos/tree/main/modules/spring-ai-java-bedrock-mcp-rag)
