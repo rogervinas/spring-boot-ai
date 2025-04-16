@@ -133,24 +133,20 @@ class WeatherToolConfiguration {
 
 #### Booking Tool
 
-To set up the **BookingTool** as a remote MCP tool, we register a `SyncMcpToolCallbackProvider` using an `McpClient` configured with the remote MCP server URL:
+To set up the **BookingTool** as a remote MCP tool, we just need to configure the MCP client [SSE connection](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html#_sse_transport_properties)  in `application.yml`:
 
-```kotlin
-@Configuration
-class BookingToolConfiguration {
-    @Bean
-    fun bookingToolCallbackProvider(@Value("\${booking-server.url}") url: String) =
-        SyncMcpToolCallbackProvider(mcpSyncClient(url))
-
-    private fun mcpSyncClient(url: String) = McpClient
-        .sync(HttpClientSseClientTransport(url))
-        .build().apply {
-            initialize()
-        }
-}
+```yaml
+spring:
+  ai:
+    mcp:
+      client:
+        sse:
+          connections:
+            booking-tool:
+              url: http://localhost:8081
 ```
 
-For alternative ways to configure it, see the [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
+You can find all the alternative configurations in [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
 
 #### ChatClient
 
@@ -373,7 +369,7 @@ class McpServerApplicationTest {
     assertThat(checkoutDateCaptor.allValues).singleElement().isEqualTo(LocalDate.parse(checkoutDate))
 
     // 8. Close the client
-    client.closeGracefully()
+    client.close()
   }
 }
 ```
