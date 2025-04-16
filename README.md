@@ -90,7 +90,7 @@ The **Chat Server** is a Spring Boot application built with the following depend
 * **BookingTool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
 
 **Chat**
-* **ChatClient** - a Spring AI ChatClient configured with:
+* **ChatClient** - a **Spring AI** ChatClient configured with:
   * A system prompt to define the AI agent’s role
   * The Ollama model autoconfigured by Spring Boot
   * The above MCP tools as part of the AI agent’s toolset
@@ -152,7 +152,7 @@ For alternative ways to configure it, see the [MCP Client Boot Starter](https://
 
 ##### ChatClient
 
-We create the **ChatClient** using Spring AI's `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
+We create the **ChatClient** using **Spring AI**'s `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
 
 ```kotlin
 @Configuration
@@ -268,7 +268,7 @@ logging:
     org.springframework.ai.chat.client.advisor: INFO
 ```
 
-In the `ollama` profile configuration file, `application-ollama.yml`, we configure Spring AI to use Ollama models:
+In the `ollama` profile configuration file, `application-ollama.yml`, we configure **Spring AI** to use Ollama models:
 * Set the base URL for the Ollama server to `http://localhost:11434`.
 * Set the chat model to [llama3.1:8b](https://ollama.com/library/llama3.1:8b) (must be a **tools**-enabled model).
 * Set the embedding model to [nomic-embed-text](https://ollama.com/library/nomic-embed-text).
@@ -344,7 +344,7 @@ curl -X POST "http://localhost:8080/2/chat" \
 
 ## How to use other AI models
 
-To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by Spring AI, follow these steps:
+To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by **Spring AI**, follow these steps:
 * Add the required dependencies
 * Configure the model in its own `application-<model>.yml` file
 * Activate the profile using `spring.profiles.active=<model>` in the main `application.yml` file
