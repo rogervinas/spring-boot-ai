@@ -245,8 +245,8 @@ It's as simple as using **Spring AI**’s autoconfigured `VectorStore` and addin
 fun vectorStoreInitializer(vectorStore: VectorStore) = ApplicationRunner {
     // TODO check if the vector store is empty ...
     // TODO load cities from a JSON file or any other source ...
-    cities.forEach { c ->
-      val document = Document("name: ${c.name} country: ${c.country} description: ${c.description}")
+    cities.forEach { city ->
+      val document = Document("name: ${city.name} country: ${city.country} description: ${city.description}")
       vectorStore.add(listOf(document))
     }
 }
