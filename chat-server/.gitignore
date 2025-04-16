@@ -3,3 +3,4 @@
 .gradle
 .ollama
 build
+system.properties
