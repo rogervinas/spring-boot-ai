@@ -33,4 +33,3 @@ class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) 
             }
     }
 }
-
