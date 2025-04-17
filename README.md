@@ -382,8 +382,12 @@ class McpServerApplicationTest {
 
 To test the **Chat Server**, we will:
 * Replace the remote **Booking Tool** by a local **Booking Test Tool** with the same signature.
-* Mock the downstream services **Weather Service** and **Booking Service**.
-* Use a fixed **Clock** to control the date.
+  * Disable the MCP client with `spring.ai.mcp.client.enabled: false` in `application-test.yml`.
+  * Create the local **Book Testing Tool** in [BookingTestToolConfiguration.kt](chat-server/src/main/kotlin/com/rogervinas/BookingTestToolConfiguration.kt).
+* Mock the downstream services **Weather Service** and **Booking Service** with `MockitoBean`.
+* Create a fixed **Clock** to control the date in [ClockTestToolConfiguration.kt](chat-server/src/test/kotlin/com/rogervinas/configuration/ClockTestToolConfiguration.kt)
+  * Declare it as `@Primary @Bean` to override the default `Clock` bean.
+* Start Docker Compose with both Ollama and PGVector using [Testcontainers](https://testcontainers.com/)
 
 ![Chat Server Test](.doc/test-chat-server.png)
 
@@ -396,6 +400,70 @@ This aligns with the **evaluation techniques** described in Martin Fowler’s [E
 * **Human evaluation**: People manually review responses to ensure the tone and intent feel right. 
 
 To keep things simple, we’ll go with self-evaluation 🤓
+
+Each test will follow this structure:
+
+```kotlin
+fun `should do something`() {
+    // 1. Mock downstream service(s)
+    // Optionally use argument captors depending on how you plan to verify parameters in step 5
+    // Example for BookingService:
+    doReturn("Your booking is done!")
+      .whenever(bookingTestService).book(any(), any(), any())
+
+    // 2. Call the chat service
+    val chatId = UUID.randomUUID().toString()
+    val chatResponse = chatService.chat(chatId, "Can you book accommodation for Barcelona from 2025-04-15 to 2025-04-18?")
+  
+    // 3. Evaluate the response using the AI model
+    val evaluationResult = TestEvaluator(chatClientBuilder) { evaluationRequest, userSpec ->
+      userSpec.text(
+        """
+            Your task is to evaluate if the answer given by an AI agent to a human user matches the claim.
+            Return YES if the answer matches the claim and NO if it does not.
+            After returning YES or NO, explain why.
+            Assume that today is ${LocalDate.now(clock)}.
+            Answer: {answer}
+            Claim: {claim}
+        """.trimIndent()
+      )
+        .param("answer", evaluationRequest.responseContent)
+        .param("claim", evaluationRequest.userText)
+    }.evaluate(EvaluationRequest("Accommodation has been booked Barcelona from 2025-04-15 to 2025-04-18", chatResponse))
+  
+    // 4. Assert the evaluation result is successful, show feedback if not
+    assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
+  
+    // 5. If applicable, verify the parameters passed to the service
+    // You can verify with argument captors or use the `verify` method as in the example below:
+    verify(bookingTestService).book(
+      eq("Barcelona"), 
+      eq(LocalDate.parse("2025-04-15")), 
+      eq(LocalDate.parse("2025-04-18"))
+    )
+}
+```
+
+See the full test implementation in [ChatServerApplicationTest.kt](chat-server/src/test/kotlin/com/rogervinas/ChatServerApplicationTest.kt).
+
+Each evaluation uses a custom prompt tailored to the specific response being tested, and as you experiment, you'll notice some surprisingly quirky behavior. That’s why I ended up creating a custom `TestEvaluator`, based on Spring AI’s `RelevancyEvaluator` and `FactCheckingEvaluator`, which may not yet offer the level of customization you might want.
+
+I had to adjust each prompt after running into odd results. For example, the evaluation model assuming it was still 2023 and refusing to believe the AI agent could predict weather for 2025. Or it mistaking "you" in the answer as referring to itself instead of the user. The weirdest? One evaluation just answered “NO” but the explanation said, “well, maybe I should have said YES” 🤣
+
+For a production system, you'd definitely need a lot of prompt tuning and testing to get things right, for both the system and the evaluator, I suppose that’s part of the "fun" when working with GenAI.
+
+This whole setup can run locally without needing powerful hardware, the models are lightweight enough for a laptop. That said, it's slow. To speed things up for CI, I disabled all tests except for this basic one:
+
+```kotlin
+@Test
+@EnabledIfCI
+fun `should be up and running`() {
+    val chatId = UUID.randomUUID().toString()
+    val chatResponse = chatService.chat(chatId, "Hello!")
+
+    assertThat(chatResponse).isNotNull() // Any response is good 👌
+}
+```
 
 ## Run
 
@@ -454,3 +522,6 @@ To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/a
 * [Spring AI](https://docs.spring.io/spring-ai/reference/index.html) documentation
 * [Martin Fowler's GenAI patterns](https://martinfowler.com/articles/gen-ai-patterns)
 * Inspired by sample project [spring-ai-java-bedrock-mcp-rag](https://github.com/aws-samples/Sample-Model-Context-Protocol-Demos/tree/main/modules/spring-ai-java-bedrock-mcp-rag)
+* [Awesome Spring AI](https://github.com/danvega/awesome-spring-ai)
+
+Happy GenAI coding! 💙
