@@ -391,6 +391,8 @@ To test the **Chat Server**, we will:
 
 ![Chat Server Test](.doc/test-chat-server.png)
 
+You might’ve noticed that the test doesn’t actually check the MCP client’s SSE connection as it is disabled. I tried spinning up an `McpServer` using `McpServerAutoConfiguration`, and it almost worked. The problem? The client tries to connect before the server is up, which causes the whole application to fail on startup. Maybe is just an ordering issue, and hopefully something that can be fixed in the future 🤞
+
 Now for the interesting part, how do we test the AI agent’s response? This is where [Evaluation Testing](https://docs.spring.io/spring-ai/reference/api/testing.html) comes in:
 > One method to evaluate the response is to use the AI model itself for evaluation. Select the best AI model for the evaluation, which may not be the same model used to generate the response.
 
