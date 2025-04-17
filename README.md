@@ -317,7 +317,7 @@ To test the **MCP Server**, we will use a `McpClient` to call the `book` method 
 
 ![MCP Server Test](.doc/test-mcp-server.png)
 
-See the simplified 7-step test implementation below. For the complete implementation, including a test that verifies the list of available tools, refer to [McpServerApplicationTest.kt](mcp-server/src/test/kotlin/com/rogervinas/McpServerApplicationTest.kt).
+See the simplified test implementation below. For the complete implementation, including a test that verifies the list of available tools, refer to [McpServerApplicationTest.kt](mcp-server/src/test/kotlin/com/rogervinas/McpServerApplicationTest.kt).
 
 ```kotlin
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -518,6 +518,8 @@ To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/a
 * Add the required dependencies
 * Configure the model in its own `application-<model>.yml` file
 * Activate the profile using `spring.profiles.active=<model>` in the main `application.yml` file
+
+For example, checkout the `bedrock` branch in this repo for the [AWS Bedrock](https://aws.amazon.com/bedrock/) model configuration.
 
 ## Documentation
 
