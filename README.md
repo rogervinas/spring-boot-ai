@@ -390,7 +390,7 @@ To test the **Chat Server**, we will:
 Now for the interesting part, how do we test the AI agent’s response? This is where [Evaluation Testing](https://docs.spring.io/spring-ai/reference/api/testing.html) comes in:
 > One method to evaluate the response is to use the AI model itself for evaluation. Select the best AI model for the evaluation, which may not be the same model used to generate the response.
 
-Explore the range of evaluation techniques in Martin Fowler’s GenAI pattern [Evals](https://martinfowler.com/articles/gen-ai-patterns/#evals):
+This aligns with the evaluation techniques described in Martin Fowler’s [Evals](https://martinfowler.com/articles/gen-ai-patterns/#evals) GenAI pattern:
 * **Self-evaluation**: The LLM evaluates its own response, but this can reinforce its own mistakes or biases.
 * **LLM as a judge**: Another model scores the output, reducing bias by introducing a second opinion.
 * **Human evaluation**: People manually review responses to ensure the tone and intent feel right. 
