@@ -96,7 +96,7 @@ class ChatServerApplicationTest {
                 Return YES if the answer matches the claim and NO if it does not.
                 After returning YES or NO, explain why.
                 Ignore date formatting differences when comparing dates.
-                Ignore what is the actual current date.
+                Assume that today is ${LocalDate.now(clock)}.
                 Answer: {answer}
                 Claim: {claim}
             """.trimIndent()
@@ -291,7 +291,7 @@ class ChatServerApplicationTest {
             )
                 .param("answer", evaluationRequest.responseContent)
                 .param("claim", evaluationRequest.userText)
-        }.evaluate(EvaluationRequest("Accommodation cannot be booked", chatResponse))
+        }.evaluate(EvaluationRequest("Accommodation cannot be booked for the requested dates", chatResponse))
 
         assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
     }
