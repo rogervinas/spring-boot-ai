@@ -87,26 +87,26 @@ The **Chat Server** is a Spring Boot application built with the following depend
 #### Components
 
 * **MCP Tools**
-  * **WeatherTool** - a local MCP tool that queries a **WeatherService** for the weather in a given city on a given date
-  * **ClockTool** - a local MCP tool that returns the system date, letting us control the date the AI agent uses to avoid unpredictability
-  * **BookingTool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
+  * **Weather Tool** - a local MCP tool that queries a **WeatherService** for the weather in a given city on a given date
+  * **Clock Tool** - a local MCP tool that returns the system date, letting us control the date the AI agent uses to avoid unpredictability
+  * **Booking Tool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
 * **Chat**
-  * **ChatClient** - a **Spring AI** ChatClient configured with:
+  * **Chat Client** - a **Spring AI** ChatClient configured with:
     * A system prompt to define the AI agent’s role
     * The Ollama model autoconfigured by Spring Boot
     * The above MCP tools as part of the AI agent’s toolset
-  * **ChatService** - wraps the **ChatClient** and adds three advisors:
+  * **Chat Service** - wraps the **ChatClient** and adds three advisors:
     * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
     * **PromptChatMemoryAdvisor** - adds conversation history to the user input (chat memory)
     * **SimpleLoggerAdvisor** - logs the chat history to the console (for debugging)
-  * **ChatController** - exposes a simple REST POST endpoint that takes user input, calls the **ChatService**, and returns the AI agent’s response
+  * **Chat Controller** - exposes a simple REST POST endpoint that takes user input, calls the **ChatService**, and returns the AI agent’s response
 * **Vector Store Initializer** - loads some sample data into the vector store at startup
 
 Let's implement this step by step ...
 
 #### Weather and Clock Tools
 
-Here's how the **WeatherTool** is implemented (the same applies to **ClockTool**):
+Here's how the **Weather Tool** is implemented (the same applies to **Clock Tool**):
 
 1. Create an instance and annotate it with `@Tool` and `@ToolParam`:
 ```kotlin
@@ -133,7 +133,7 @@ class WeatherToolConfiguration {
 
 #### Booking Tool
 
-To set up the **BookingTool** as a remote MCP tool, we just need to configure the MCP client [SSE connection](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html#_sse_transport_properties)  in `application.yml`:
+To set up the **Booking Tool** as a remote MCP tool, we just need to configure the MCP client [SSE connection](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html#_sse_transport_properties)  in `application.yml`:
 
 ```yaml
 spring:
@@ -256,7 +256,7 @@ In the main `application.yml` file, we define global configuration values:
 * Set the active Spring profile to `ollama`, allowing us to configure specific properties for the Ollama model in the `application-ollama.yml` file.
 * Configure the datasource to connect to a PostgreSQL database with PGVector support.
 * Set the server port to `8080`.
-* Configure the URL of the remote **BookingTool** MCP server.
+* Configure the URL of the remote **Booking Tool** MCP server.
 * Set the logging level for chat advisor debug traces.
 
 ```yaml
@@ -313,7 +313,7 @@ spring:
 
 ### MCP Server
 
-To test the **MCP Server**, we use a `McpClient` to call the `book` method of the **BookingTool**, mocking the downstream **BookingService**:
+To test the **MCP Server**, we will use a `McpClient` to call the `book` method of the **Booking Tool**, mocking the downstream **BookingService**:
 
 ![MCP Server Test](.doc/test-mcp-server.png)
 
@@ -380,7 +380,12 @@ class McpServerApplicationTest {
 
 ### Chat Server
 
+To test the **Chat Server**, we will:
+* Replace the remote **Booking Tool** by a local **Booking Test Tool** with the same signature.
+* Mock the downstream services **Weather Service** and **Booking Service**.
+* Use a fixed **Clock** to control the date.
 
+![Chat Server Test](.doc/test-chat-server.png)
 
 ## Run
 
