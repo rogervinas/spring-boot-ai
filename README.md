@@ -387,6 +387,16 @@ To test the **Chat Server**, we will:
 
 ![Chat Server Test](.doc/test-chat-server.png)
 
+Now for the interesting part, how do we test the AI agent’s response? This is where [Evaluation Testing](https://docs.spring.io/spring-ai/reference/api/testing.html) comes in:
+> One method to evaluate the response is to use the AI model itself for evaluation. Select the best AI model for the evaluation, which may not be the same model used to generate the response.
+
+Explore the range of evaluation techniques in Martin Fowler’s GenAI pattern [Evals](https://martinfowler.com/articles/gen-ai-patterns/#evals):
+* **Self-evaluation**: The LLM evaluates its own response, but this can reinforce its own mistakes or biases.
+* **LLM as a judge**: Another model scores the output, reducing bias by introducing a second opinion.
+* **Human evaluation**: People manually review responses to ensure the tone and intent feel right. 
+
+To keep things simple, we’ll go with self-evaluation 🤓
+
 ## Run
 
 We run Ollama locally using `docker compose` but you can also install it natively on your machine.
@@ -442,4 +452,5 @@ To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/a
 ## Documentation
 
 * [Spring AI](https://docs.spring.io/spring-ai/reference/index.html) documentation
-* Example project: [spring-ai-java-bedrock-mcp-rag](https://github.com/aws-samples/Sample-Model-Context-Protocol-Demos/tree/main/modules/spring-ai-java-bedrock-mcp-rag)
+* [Martin Fowler's GenAI patterns](https://martinfowler.com/articles/gen-ai-patterns)
+* Inspired by sample project [spring-ai-java-bedrock-mcp-rag](https://github.com/aws-samples/Sample-Model-Context-Protocol-Demos/tree/main/modules/spring-ai-java-bedrock-mcp-rag)
