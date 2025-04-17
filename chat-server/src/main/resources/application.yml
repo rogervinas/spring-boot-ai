@@ -1,6 +1,6 @@
 spring:
   profiles:
-    active: "ollama"
+    active: "bedrock"
   application:
     name: chat-server
   datasource:

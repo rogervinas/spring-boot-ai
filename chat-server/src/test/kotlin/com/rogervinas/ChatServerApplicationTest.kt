@@ -36,9 +36,10 @@ import java.util.UUID
 
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("test", "ollama")
+@ActiveProfiles("test", "bedrock")
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @Testcontainers
+@DisabledIfCI
 class ChatServerApplicationTest {
 
     companion object {
@@ -47,7 +48,7 @@ class ChatServerApplicationTest {
         val container = ComposeContainer(File("docker-compose.yml"))
             .withLocalCompose(true)
             .withExposedService("vectordb", 5432, forLogMessage(".*database system is ready to accept connections.*", 1))
-            .withExposedService("ollama", 11434, forLogMessage(".*inference compute.*", 1))
+            // .withExposedService("ollama", 11434, forLogMessage(".*inference compute.*", 1))
     }
 
     @Autowired
