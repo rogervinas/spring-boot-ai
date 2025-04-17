@@ -7,12 +7,13 @@
 
 # Spring Boot AI
 
-In this example, inspired by [Building Agents with AWS: Complete Tutorial](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring Boot AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like:
+In this example, inspired by [Building Agents with AWS: Complete Tutorial](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like:
 * [Chat Client API](https://docs.spring.io/spring-ai/reference/api/chatclient.html) and its [Advisors](https://docs.spring.io/spring-ai/reference/api/advisors.html)
 * Model Context Protocol ([MCP](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-overview.html))
 * Retrieval Augmented Generation ([RAG](https://docs.spring.io/spring-ai/reference/api/retrieval-augmented-generation.html))
+* Testing with [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html) 🤩
 
-We will use [Ollama](https://ollama.com/), which will hopefully let us run a local LLM without too much struggle 😮‍💨 or heavy hardware requirements. The application will be tested using [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html), and we will set up CI to run these tests automatically.
+The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but one of the great things about **Spring AI** is that with just a few config tweaks and dependency changes, the same code works with any other supported model. In our case, we’ll use [Ollama](https://ollama.com/), which will hopefully let us run locally and in CI without heavy hardware requirements 🙏
 
 The application features an AI agent that helps users book accommodations in tourist destinations.
 
@@ -36,8 +37,10 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
       * [ChatController](#chatcontroller)
 * [Configuration](#configuration)
 * [Test](#test)
+  * [MCP Server](#mcp-server-1)
+  * [Chat Server](#chat-server-1)
 * [Run](#run)
-* [Other AI models](#other-ai-models)
+* [How to use other AI models](#how-to-use-other-ai-models)
 * [Documentation](#documentation)
 
 ## Implementation
@@ -83,27 +86,27 @@ The **Chat Server** is a Spring Boot application built with the following depend
 
 #### Components
 
-**MCP Tools**
-* **WeatherTool** - a local MCP tool that queries a **WeatherService** for the weather in a given city on a given date
-* **ClockTool** - a local MCP tool that uses the system Clock to return the current date
-* **BookingTool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
-
-**Chat**
-* **ChatClient** - a Spring AI ChatClient configured with:
-  * A system prompt to define the AI agent’s role
-  * The Ollama model autoconfigured by Spring Boot
-  * The above MCP tools as part of the AI agent’s toolset
-* **ChatService** - wraps the **ChatClient** and adds three advisors:
-  * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
-  * **PromptChatMemoryAdvisor** - adds conversation history to the user input (chat memory)
-  * **SimpleLoggerAdvisor** - logs the chat history to the console (for debugging)
-* **ChatController** - exposes a simple REST POST endpoint that takes user input, calls the **ChatService**, and returns the AI agent’s response
+* **MCP Tools**
+  * **Weather Tool** - a local MCP tool that queries a **WeatherService** for the weather in a given city on a given date
+  * **Clock Tool** - a local MCP tool that returns the system date, letting us control the date the AI agent uses to avoid unpredictability
+  * **Booking Tool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
+* **Chat**
+  * **Chat Client** - a **Spring AI** ChatClient configured with:
+    * A system prompt to define the AI agent’s role
+    * The Ollama model autoconfigured by Spring Boot
+    * The above MCP tools as part of the AI agent’s toolset
+  * **Chat Service** - wraps the **ChatClient** and adds three advisors:
+    * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
+    * **PromptChatMemoryAdvisor** - adds conversation history to the user input (chat memory)
+    * **SimpleLoggerAdvisor** - logs the chat history to the console (for debugging)
+  * **Chat Controller** - exposes a simple REST POST endpoint that takes user input, calls the **ChatService**, and returns the AI agent’s response
+* **Vector Store Initializer** - loads some sample data into the vector store at startup
 
 Let's implement this step by step ...
 
-##### Weather and Clock Tools
+#### Weather and Clock Tools
 
-Here's how the **WeatherTool** is implemented (the same applies to **ClockTool**):
+Here's how the **Weather Tool** is implemented (the same applies to **Clock Tool**):
 
 1. Create an instance and annotate it with `@Tool` and `@ToolParam`:
 ```kotlin
@@ -128,30 +131,26 @@ class WeatherToolConfiguration {
 }
 ```
 
-##### Booking Tool
+#### Booking Tool
 
-To set up the **BookingTool** as a remote MCP tool, we register a `SyncMcpToolCallbackProvider` using an `McpClient` configured with the remote MCP server URL:
+To set up the **Booking Tool** as a remote MCP tool, we just need to configure the MCP client [SSE connection](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html#_sse_transport_properties)  in `application.yml`:
 
-```kotlin
-@Configuration
-class BookingToolConfiguration {
-    @Bean
-    fun bookingToolCallbackProvider(@Value("\${booking-server.url}") url: String) =
-        SyncMcpToolCallbackProvider(mcpSyncClient(url))
-
-    private fun mcpSyncClient(url: String) = McpClient
-        .sync(HttpClientSseClientTransport(url))
-        .build().apply {
-            initialize()
-        }
-}
+```yaml
+spring:
+  ai:
+    mcp:
+      client:
+        sse:
+          connections:
+            booking-tool:
+              url: http://localhost:8081
 ```
 
-For alternative ways to configure it, see the [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
+You can find all the alternative configurations in [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
 
-##### ChatClient
+#### ChatClient
 
-We create the **ChatClient** using Spring Boot AI's `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
+We create the **ChatClient** using **Spring AI**'s `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
 
 ```kotlin
 @Configuration
@@ -183,7 +182,7 @@ class ChatClientConfiguration {
 }
 ```
 
-##### ChatService
+#### ChatService
 
 The **ChatService** exposes a single `chat` method that takes a chat ID and a user question. It calls the `ChatClient` with the user question along with a set of advisors to enrich the interaction:
 * **QuestionAnswerAdvisor** - retrieves relevant context from a vector store and injects it to the context (RAG)
@@ -197,7 +196,6 @@ Here’s the implementation:
 ```kotlin
 @Service // or @Bean / @Component
 class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) {
-
     private val logger = LoggerFactory.getLogger(ChatService::class.java)
     private val questionAnswerAdvisor = QuestionAnswerAdvisor(vectorStore)
     private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
@@ -220,14 +218,13 @@ class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) 
 }
 ```
 
-##### ChatController
+#### ChatController
 
 The **ChatController** exposes a simple REST POST endpoint that takes user input, calls the `ChatService`, and returns the AI agent’s response:
 
 ```kotlin
 @RestController
 class ChatController(private val chatService: ChatService) {
-
     @PostMapping("/{chatId}/chat")
     fun chat(@PathVariable chatId: String, @RequestParam question: String): String? {
         return chatService.chat(chatId, question)
@@ -235,13 +232,31 @@ class ChatController(private val chatService: ChatService) {
 }
 ```
 
+#### Vector Store Initializer
+
+It's as simple as using **Spring AI**’s autoconfigured `VectorStore` and adding documents to it. This automatically invokes the embedding model to generate embeddings and store them in the vector store:
+
+```kotlin
+@Bean
+fun vectorStoreInitializer(vectorStore: VectorStore) = ApplicationRunner {
+    // TODO check if the vector store is empty ...
+    // TODO load cities from a JSON file or any other source ...
+    cities.forEach { city ->
+      val document = Document("name: ${city.name} country: ${city.country} description: ${city.description}")
+      vectorStore.add(listOf(document))
+    }
+}
+```
+
+You can find the full version of `vectorStoreInitializer` in [ChatServerApplication.kt](chat-server/src/main/kotlin/com/rogervinas/ChatServerApplication.kt).
+
 ## Configuration
 
 In the main `application.yml` file, we define global configuration values:
 * Set the active Spring profile to `ollama`, allowing us to configure specific properties for the Ollama model in the `application-ollama.yml` file.
 * Configure the datasource to connect to a PostgreSQL database with PGVector support.
 * Set the server port to `8080`.
-* Configure the URL of the remote **BookingTool** MCP server.
+* Configure the URL of the remote **Booking Tool** MCP server.
 * Set the logging level for chat advisor debug traces.
 
 ```yaml
@@ -267,7 +282,7 @@ logging:
     org.springframework.ai.chat.client.advisor: INFO
 ```
 
-In the `ollama` profile configuration file, `application-ollama.yml`, we configure Spring AI to use Ollama models:
+In the `ollama` profile configuration file, `application-ollama.yml`, we configure **Spring AI** to use Ollama models:
 * Set the base URL for the Ollama server to `http://localhost:11434`.
 * Set the chat model to [llama3.1:8b](https://ollama.com/library/llama3.1:8b) (must be a **tools**-enabled model).
 * Set the embedding model to [nomic-embed-text](https://ollama.com/library/nomic-embed-text).
@@ -296,7 +311,161 @@ spring:
 
 ## Test
 
-TODO
+### MCP Server
+
+To test the **MCP Server**, we will use a `McpClient` to call the `book` method of the **Booking Tool**, mocking the downstream **BookingService**:
+
+![MCP Server Test](.doc/test-mcp-server.png)
+
+See the simplified test implementation below. For the complete implementation, including a test that verifies the list of available tools, refer to [McpServerApplicationTest.kt](mcp-server/src/test/kotlin/com/rogervinas/McpServerApplicationTest.kt).
+
+```kotlin
+@SpringBootTest(webEnvironment = RANDOM_PORT)
+class McpServerApplicationTest {
+
+  // 1. Inject the server port (it is random)
+  @LocalServerPort
+  val port: Int = 0
+
+  // 2. Mock the BookingService instance
+  @MockitoBean
+  lateinit var bookingService: BookingService
+
+  @Test
+  fun `should book`() {
+    // 3. Create a McpClient connected to the server
+    val client = McpClient.sync(HttpClientSseClientTransport("http://localhost:$port")).build()
+    client.initialize()
+    client.ping()
+
+    // 4. Mock the bookingService using argument captors
+    val bookResult = "Booking is done!"
+    val cityCaptor = argumentCaptor<String>()
+    val checkinDateCaptor = argumentCaptor<LocalDate>()
+    val checkoutDateCaptor = argumentCaptor<LocalDate>()
+    doReturn(bookResult)
+      .whenever(bookingService)
+      .book(cityCaptor.capture(), checkinDateCaptor.capture(), checkoutDateCaptor.capture())
+
+    // 5. Call the tool
+    val city = "Barcelona"
+    val checkinDate = "2025-04-15"
+    val checkoutDate = "2025-04-18"
+    val result = client.callTool(CallToolRequest(
+      "book",
+      mapOf(
+        "city" to city,
+        "checkinDate" to checkinDate,
+        "checkoutDate" to checkoutDate
+      )
+    ))
+
+    // 6. Verify the result
+    assertThat(result.isError).isFalse()
+    assertThat(result.content).singleElement().isInstanceOfSatisfying(TextContent::class.java) {
+      // TODO why is text double quoted?
+      assertThat(it.text).isEqualTo("\"$bookResult\"")
+    }
+
+    // 7. Verify that the bookingService was called with the correct parameters
+    assertThat(cityCaptor.allValues).singleElement().isEqualTo(city)
+    assertThat(checkinDateCaptor.allValues).singleElement().isEqualTo(LocalDate.parse(checkinDate))
+    assertThat(checkoutDateCaptor.allValues).singleElement().isEqualTo(LocalDate.parse(checkoutDate))
+
+    // 8. Close the client
+    client.close()
+  }
+}
+```
+
+### Chat Server
+
+To test the **Chat Server**, we will:
+* Replace the remote **Booking Tool** by a local **Booking Test Tool** with the same signature.
+  * Disable the MCP client with `spring.ai.mcp.client.enabled: false` in `application-test.yml`.
+  * Create the local **Book Testing Tool** in [BookingTestToolConfiguration.kt](chat-server/src/main/kotlin/com/rogervinas/BookingTestToolConfiguration.kt).
+* Mock the downstream services **Weather Service** and **Booking Service** with `MockitoBean`.
+* Create a fixed **Clock** to control the date in [ClockTestToolConfiguration.kt](chat-server/src/test/kotlin/com/rogervinas/configuration/ClockTestToolConfiguration.kt)
+  * Declare it as `@Primary @Bean` to override the default `Clock` bean.
+* Start Docker Compose with both Ollama and PGVector using [Testcontainers](https://testcontainers.com/)
+
+![Chat Server Test](.doc/test-chat-server.png)
+
+You might’ve noticed that the test doesn’t actually check the MCP client’s SSE connection as it is disabled. I tried spinning up an `McpServer` using `McpServerAutoConfiguration`, and it almost worked. The problem? The client tries to connect before the server is up, which causes the whole application to fail on startup. Maybe is just an ordering issue, and hopefully something that can be fixed in the future 🤞
+
+Now for the interesting part, how do we test the AI agent’s response? This is where [Evaluation Testing](https://docs.spring.io/spring-ai/reference/api/testing.html) comes in:
+> One method to evaluate the response is to use the AI model itself for evaluation. Select the best AI model for the evaluation, which may not be the same model used to generate the response.
+
+This aligns with the **evaluation techniques** described in Martin Fowler’s [Evals](https://martinfowler.com/articles/gen-ai-patterns/#evals) GenAI pattern:
+* **Self-evaluation**: The LLM evaluates its own response, but this can reinforce its own mistakes or biases.
+* **LLM as a judge**: Another model scores the output, reducing bias by introducing a second opinion.
+* **Human evaluation**: People manually review responses to ensure the tone and intent feel right. 
+
+To keep things simple, we’ll go with self-evaluation 🤓
+
+Each test will follow this structure:
+
+```kotlin
+fun `should do something`() {
+    // 1. Mock downstream service(s)
+    // Optionally use argument captors depending on how you plan to verify parameters in step 5
+    // Example for BookingService:
+    doReturn("Your booking is done!")
+      .whenever(bookingTestService).book(any(), any(), any())
+
+    // 2. Call the chat service
+    val chatId = UUID.randomUUID().toString()
+    val chatResponse = chatService.chat(chatId, "Can you book accommodation for Barcelona from 2025-04-15 to 2025-04-18?")
+  
+    // 3. Evaluate the response using the AI model
+    val evaluationResult = TestEvaluator(chatClientBuilder) { evaluationRequest, userSpec ->
+      userSpec.text(
+        """
+            Your task is to evaluate if the answer given by an AI agent to a human user matches the claim.
+            Return YES if the answer matches the claim and NO if it does not.
+            After returning YES or NO, explain why.
+            Assume that today is ${LocalDate.now(clock)}.
+            Answer: {answer}
+            Claim: {claim}
+        """.trimIndent()
+      )
+        .param("answer", evaluationRequest.responseContent)
+        .param("claim", evaluationRequest.userText)
+    }.evaluate(EvaluationRequest("Accommodation has been booked Barcelona from 2025-04-15 to 2025-04-18", chatResponse))
+  
+    // 4. Assert the evaluation result is successful, show feedback if not
+    assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
+  
+    // 5. If applicable, verify the parameters passed to the service
+    // You can verify with argument captors or use the `verify` method as in the example below:
+    verify(bookingTestService).book(
+      eq("Barcelona"), 
+      eq(LocalDate.parse("2025-04-15")), 
+      eq(LocalDate.parse("2025-04-18"))
+    )
+}
+```
+
+See the full test implementation in [ChatServerApplicationTest.kt](chat-server/src/test/kotlin/com/rogervinas/ChatServerApplicationTest.kt).
+
+Each evaluation uses a custom prompt tailored to the specific response being tested, and as you experiment, you'll notice some surprisingly quirky behavior. That’s why I ended up creating a custom `TestEvaluator`, based on Spring AI’s `RelevancyEvaluator` and `FactCheckingEvaluator`, which may not yet offer the level of customization you might want.
+
+I had to adjust each prompt after running into odd results. For example, the evaluation model assuming it was still 2023 and refusing to believe the AI agent could predict weather for 2025. Or it mistaking "you" in the answer as referring to itself instead of the user. The weirdest? One evaluation just answered “NO” but the explanation said, “well, maybe I should have said YES” 🤣
+
+For a production system, you'd definitely need a lot of prompt tuning and testing to get things right, for both the system and the evaluator, I suppose that’s part of the "fun" when working with GenAI.
+
+This whole setup can run locally without needing powerful hardware, the models are lightweight enough for a laptop. That said, it's slow. To speed things up for CI, I disabled all tests except for this basic one:
+
+```kotlin
+@Test
+@EnabledIfCI
+fun `should be up and running`() {
+    val chatId = UUID.randomUUID().toString()
+    val chatResponse = chatService.chat(chatId, "Hello!")
+
+    assertThat(chatResponse).isNotNull() // Any response is good 👌
+}
+```
 
 ## Run
 
@@ -323,6 +492,8 @@ cd chat-server
 
 4. Execute queries
 
+You can access the API at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) or use any HTTP client of your choice. Below are some examples using `curl`:
+
 ```shell
 curl -X POST "http://localhost:8080/2/chat" \
 -H "Content-Type: application/x-www-form-urlencoded" \
@@ -341,14 +512,20 @@ curl -X POST "http://localhost:8080/2/chat" \
 -d "question=Can I get a hotel for Berlin next monday for two nights?"
 ```
 
-## Other AI models
+## How to use other AI models
 
-To use a different [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by Spring AI, follow these steps:
+To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by **Spring AI**, follow these steps:
 * Add the required dependencies
 * Configure the model in its own `application-<model>.yml` file
 * Activate the profile using `spring.profiles.active=<model>` in the main `application.yml` file
 
+For example, checkout the `bedrock` branch in this repo for the [AWS Bedrock](https://aws.amazon.com/bedrock/) model configuration.
+
 ## Documentation
 
-* [Spring Boot AI](https://docs.spring.io/spring-ai/reference/index.html) documentation
-* Example project: [spring-ai-java-bedrock-mcp-rag](https://github.com/aws-samples/Sample-Model-Context-Protocol-Demos/tree/main/modules/spring-ai-java-bedrock-mcp-rag)
+* [Spring AI](https://docs.spring.io/spring-ai/reference/index.html) documentation
+* [Martin Fowler's GenAI patterns](https://martinfowler.com/articles/gen-ai-patterns)
+* Inspired by sample project [spring-ai-java-bedrock-mcp-rag](https://github.com/aws-samples/Sample-Model-Context-Protocol-Demos/tree/main/modules/spring-ai-java-bedrock-mcp-rag)
+* [Awesome Spring AI](https://github.com/danvega/awesome-spring-ai)
+
+Happy GenAI coding! 💙
