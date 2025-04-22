@@ -38,8 +38,8 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
       * [Vector Store Initializer](#vector-store-initializer)
 * [Configuration](#configuration)
 * [Test](#test)
-  * [MCP Server](#mcp-server-1)
-  * [Chat Server](#chat-server-1)
+  * [Test MCP Server](#test-mcp-server)
+  * [Test Chat Server](#test-chat-server)
 * [Run](#run)
 * [How to use other AI models](#how-to-use-other-ai-models)
 * [Documentation](#documentation)
@@ -330,7 +330,7 @@ spring:
 
 ## Test
 
-### MCP Server
+### Test MCP Server
 
 To test the **MCP Server**, we will use a `McpClient` to call the `book` method of the **Booking Tool**, mocking the downstream **BookingService**:
 
@@ -408,7 +408,7 @@ class McpServerApplicationTest {
 }
 ```
 
-### Chat Server
+### Test Chat Server
 
 To test the **Chat Server**, we will:
 * Replace the remote **Booking Tool** by a local **Booking Test Tool** with the same signature.
