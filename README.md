@@ -100,11 +100,11 @@ The **Chat Server** is a Spring Boot application built with the following depend
     * A system prompt to define the AI agent’s role
     * The Ollama model autoconfigured by Spring Boot
     * The above MCP tools as part of the AI agent’s toolset
-  * **Chat Service** - wraps the **ChatClient** and adds three advisors:
+  * **Chat Service** - wraps the **Chat Client** and adds three advisors:
     * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
     * **PromptChatMemoryAdvisor** - adds conversation history to the user input (chat memory)
     * **SimpleLoggerAdvisor** - logs the chat history to the console (for debugging)
-  * **Chat Controller** - exposes a simple REST POST endpoint that takes user input, calls the **ChatService**, and returns the AI agent’s response
+  * **Chat Controller** - exposes a simple REST POST endpoint that takes user input, calls the **Chat Service**, and returns the AI agent’s response
 * **Vector Store Initializer** - loads some sample data into the vector store at startup
 
 Let's implement this step by step ...
@@ -158,7 +158,7 @@ You can find all the alternative configurations in [MCP Client Boot Starter](htt
 
 #### Chat Client
 
-We create the **ChatClient** using **Spring AI**'s `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
+We create the **Chat Client** using **Spring AI**'s `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
 
 ```kotlin
 @Configuration
@@ -192,7 +192,7 @@ class ChatClientConfiguration {
 
 #### Chat Service
 
-The **ChatService** exposes a single `chat` method that takes a chat ID and a user question. It calls the `ChatClient` with the user question along with a set of advisors to enrich the interaction:
+The **Chat Service** exposes a single `chat` method that takes a chat ID and a user question. It calls the **Chat Client** with the user question along with a set of advisors to enrich the interaction:
 * **QuestionAnswerAdvisor** - retrieves relevant context from a vector store and injects it to the context (RAG)
 * **PromptChatMemoryAdvisor** - retrieves or creates an `InMemoryChatMemory` for the given chat ID and adds it to the context
 * **SimpleLoggerAdvisor** - logs internal advisor traces to the console (if `logging.level.org.springframework.ai.chat.client.advisor` is set to `DEBUG`)
@@ -231,7 +231,7 @@ class ChatService(
 
 #### Chat Controller
 
-The **ChatController** exposes a simple REST POST endpoint that takes user input, calls the `ChatService`, and returns the AI agent’s response:
+The **Chat Controller** exposes a simple REST POST endpoint that takes user input, calls the **Chat Service**, and returns the AI agent’s response:
 
 ```kotlin
 @RestController
