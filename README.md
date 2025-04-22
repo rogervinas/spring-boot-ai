@@ -32,9 +32,10 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
     * [Components](#components)
       * [Weather and Clock Tools](#weather-and-clock-tools)
       * [Booking Tool](#booking-tool)
-      * [ChatClient](#chatclient)
-      * [ChatService](#chatservice)
-      * [ChatController](#chatcontroller)
+      * [Chat Client](#chat-client)
+      * [Chat Service](#chat-service)
+      * [Chat Controller](#chat-controller)
+      * [Vector Store Initializer](#vector-store-initializer)
 * [Configuration](#configuration)
 * [Test](#test)
   * [MCP Server](#mcp-server-1)
@@ -54,25 +55,29 @@ As is often the case with Spring Boot, implementing the **MCP Server** is pretty
 ```kotlin
 @Service // or @Bean / @Component
 class BookingTool(private val bookingService: BookingService) {
-    @Tool(
-        description = "make a reservation for accommodation for a given city and date",
-    )
-    fun book(
-        @ToolParam(description = "the city to make the reservation for") city: String,
-        @ToolParam(description = "the check-in date, when the guest begins their stay") checkinDate: LocalDate,
-        @ToolParam(description = "the check-out date, when the guest ends their stay") checkoutDate: LocalDate
-    ): String = bookingService.book(city, checkinDate, checkoutDate) // Delegate to a service
+  @Tool(
+    description = "make a reservation for accommodation for a given city and date",
+  )
+  fun book(
+    @ToolParam(description = "the city to make the reservation for")
+    city: String,
+    @ToolParam(description = "the check-in date, when the guest begins their stay")
+    checkinDate: LocalDate,
+    @ToolParam(description = "the check-out date, when the guest ends their stay")
+    checkoutDate: LocalDate
+  ): String = bookingService.book(city, checkinDate, checkoutDate) // Delegate to a service
 }
 ```
 
-3. Register it as a `MethodToolCallbackProvider`: 
+3. Register it as a `MethodToolCallbackProvider`:
 ```kotlin
 @Configuration
 class BookingToolConfiguration {
-    @Bean
-    fun bookingToolCallbackProvider(bookingTool: BookingTool) = MethodToolCallbackProvider.builder()
-        .toolObjects(bookingTool)
-        .build()
+  @Bean
+  fun bookingToolCallbackProvider(bookingTool: BookingTool) = 
+    MethodToolCallbackProvider.builder()
+      .toolObjects(bookingTool)
+      .build()
 }
 ```
 
@@ -112,11 +117,13 @@ Here's how the **Weather Tool** is implemented (the same applies to **Clock Tool
 ```kotlin
 @Service // or @Bean / @Component
 class WeatherTool(private val weatherService: WeatherService) {
-    @Tool(description = "get the weather for a given city and date")
-    fun getWeather(
-        @ToolParam(description = "the city to get the weather for") city: String,
-        @ToolParam(description = "the date to get the weather for") date: LocalDate
-    ): String = weatherService.getWeather(city, date) // Delegate to a service
+  @Tool(description = "get the weather for a given city and date")
+  fun getWeather(
+    @ToolParam(description = "the city to get the weather for")
+    city: String,
+    @ToolParam(description = "the date to get the weather for") 
+    date: LocalDate
+  ): String = weatherService.getWeather(city, date) // Delegate to a service
 }
 ```
 
@@ -124,10 +131,11 @@ class WeatherTool(private val weatherService: WeatherService) {
 ```kotlin
 @Configuration
 class WeatherToolConfiguration {
-    @Bean
-    fun weatherToolCallbackProvider(weatherTool: WeatherTool) = MethodToolCallbackProvider.builder()
-        .toolObjects(weatherTool)
-        .build()
+  @Bean
+  fun weatherToolCallbackProvider(weatherTool: WeatherTool) =
+    MethodToolCallbackProvider.builder()
+      .toolObjects(weatherTool)
+      .build()
 }
 ```
 
@@ -148,7 +156,7 @@ spring:
 
 You can find all the alternative configurations in [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
 
-#### ChatClient
+#### Chat Client
 
 We create the **ChatClient** using **Spring AI**'s `ChatClient.Builder`, which is already autoconfigured via `spring.ai` configuration properties (we'll talk at that later in [Configuration](#configuration)), and initialize it with a custom system prompt and the available MCP tools:
 
@@ -168,13 +176,13 @@ class ChatClientConfiguration {
     toolCallbackProviders: List<ToolCallbackProvider>
   ): ChatClient.Builder {
     val system = """
-        You are an AI powered assistant to help people book accommodation in touristic cities around the world.
-        If there is no information, then return a polite response suggesting you don't know.
-        If the response involves a timestamp, be sure to convert it to something human-readable.
-        Do not include any indication of what you're thinking.
-        Use the tools available to you to answer the questions.
-        Just give the answer.
-        """.trimIndent()
+      You are an AI powered assistant to help people book accommodation in touristic cities around the world.
+      If there is no information, then return a polite response suggesting you don't know.
+      If the response involves a timestamp, be sure to convert it to something human-readable.
+      Do not include any indication of what you're thinking.
+      Use the tools available to you to answer the questions.
+      Just give the answer.
+      """.trimIndent()
     return builder
       .defaultSystem(system)
       .defaultTools(*toolCallbackProviders.toTypedArray())
@@ -182,7 +190,7 @@ class ChatClientConfiguration {
 }
 ```
 
-#### ChatService
+#### Chat Service
 
 The **ChatService** exposes a single `chat` method that takes a chat ID and a user question. It calls the `ChatClient` with the user question along with a set of advisors to enrich the interaction:
 * **QuestionAnswerAdvisor** - retrieves relevant context from a vector store and injects it to the context (RAG)
@@ -195,40 +203,46 @@ Here’s the implementation:
 
 ```kotlin
 @Service // or @Bean / @Component
-class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) {
-    private val logger = LoggerFactory.getLogger(ChatService::class.java)
-    private val questionAnswerAdvisor = QuestionAnswerAdvisor(vectorStore)
-    private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
-    private val chatMemory = ConcurrentHashMap<String, PromptChatMemoryAdvisor>()
+class ChatService(
+  vectorStore: VectorStore, 
+  private val chatClient: ChatClient
+) {
+  private val logger = LoggerFactory.getLogger(ChatService::class.java)
+  private val questionAnswerAdvisor = QuestionAnswerAdvisor(vectorStore)
+  private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
+  private val chatMemory = ConcurrentHashMap<String, PromptChatMemoryAdvisor>()
 
-    fun chat(chatId: String, question: String): String? {
-        val chatMemoryAdvisor = chatMemory.computeIfAbsent(chatId) {
-            PromptChatMemoryAdvisor.builder(InMemoryChatMemory()).build()
-        }
-        return chatClient
-            .prompt()
-            .user(question)
-            .advisors(questionAnswerAdvisor, chatMemoryAdvisor, simpleLoggerAdvisor)
-            .call()
-            .content().apply {
-                logger.info("Chat #$chatId question: $question")
-                logger.info("Chat #$chatId answer: $this")
-            }
+  fun chat(chatId: String, question: String): String? {
+    val chatMemoryAdvisor = chatMemory.computeIfAbsent(chatId) {
+      PromptChatMemoryAdvisor.builder(InMemoryChatMemory()).build()
     }
+    return chatClient
+      .prompt()
+      .user(question)
+      .advisors(questionAnswerAdvisor, chatMemoryAdvisor, simpleLoggerAdvisor)
+      .call()
+      .content().apply {
+        logger.info("Chat #$chatId question: $question")
+        logger.info("Chat #$chatId answer: $this")
+      }
+  }
 }
 ```
 
-#### ChatController
+#### Chat Controller
 
 The **ChatController** exposes a simple REST POST endpoint that takes user input, calls the `ChatService`, and returns the AI agent’s response:
 
 ```kotlin
 @RestController
 class ChatController(private val chatService: ChatService) {
-    @PostMapping("/{chatId}/chat")
-    fun chat(@PathVariable chatId: String, @RequestParam question: String): String? {
-        return chatService.chat(chatId, question)
-    }
+  @PostMapping("/{chatId}/chat")
+  fun chat(
+    @PathVariable chatId: String, 
+    @RequestParam question: String
+  ): String? {
+    return chatService.chat(chatId, question)
+  }
 }
 ```
 
@@ -238,14 +252,19 @@ It's as simple as using **Spring AI**’s autoconfigured `VectorStore` and addin
 
 ```kotlin
 @Bean
-fun vectorStoreInitializer(vectorStore: VectorStore) = ApplicationRunner {
+fun vectorStoreInitializer(vectorStore: VectorStore) = 
+  ApplicationRunner {
     // TODO check if the vector store is empty ...
     // TODO load cities from a JSON file or any other source ...
     cities.forEach { city ->
-      val document = Document("name: ${city.name} country: ${city.country} description: ${city.description}")
+      val document = Document(
+        "name: ${city.name} " +
+        "country: ${city.country} " +
+        "description: ${city.description}"
+      )
       vectorStore.add(listOf(document))
     }
-}
+  }
 ```
 
 You can find the full version of `vectorStoreInitializer` in [ChatServerApplication.kt](chat-server/src/main/kotlin/com/rogervinas/ChatServerApplication.kt).
@@ -334,7 +353,9 @@ class McpServerApplicationTest {
   @Test
   fun `should book`() {
     // 3. Create a McpClient connected to the server
-    val client = McpClient.sync(HttpClientSseClientTransport("http://localhost:$port")).build()
+    val client = McpClient.sync(
+      HttpClientSseClientTransport("http://localhost:$port")
+    ).build()
     client.initialize()
     client.ping()
 
@@ -345,7 +366,11 @@ class McpServerApplicationTest {
     val checkoutDateCaptor = argumentCaptor<LocalDate>()
     doReturn(bookResult)
       .whenever(bookingService)
-      .book(cityCaptor.capture(), checkinDateCaptor.capture(), checkoutDateCaptor.capture())
+      .book(
+        cityCaptor.capture(),
+        checkinDateCaptor.capture(),
+        checkoutDateCaptor.capture()
+      )
 
     // 5. Call the tool
     val city = "Barcelona"
@@ -362,15 +387,20 @@ class McpServerApplicationTest {
 
     // 6. Verify the result
     assertThat(result.isError).isFalse()
-    assertThat(result.content).singleElement().isInstanceOfSatisfying(TextContent::class.java) {
-      // TODO why is text double quoted?
-      assertThat(it.text).isEqualTo("\"$bookResult\"")
-    }
+    assertThat(result.content).singleElement()
+      .isInstanceOfSatisfying(TextContent::class.java) {
+        // TODO why is text double quoted?
+        assertThat(it.text).isEqualTo("\"$bookResult\"")
+      }
 
-    // 7. Verify that the bookingService was called with the correct parameters
-    assertThat(cityCaptor.allValues).singleElement().isEqualTo(city)
-    assertThat(checkinDateCaptor.allValues).singleElement().isEqualTo(LocalDate.parse(checkinDate))
-    assertThat(checkoutDateCaptor.allValues).singleElement().isEqualTo(LocalDate.parse(checkoutDate))
+    // 7. Verify that the bookingService was called with
+    // the correct parameters
+    assertThat(cityCaptor.allValues).singleElement()
+      .isEqualTo(city)
+    assertThat(checkinDateCaptor.allValues).singleElement()
+      .isEqualTo(LocalDate.parse(checkinDate))
+    assertThat(checkoutDateCaptor.allValues).singleElement()
+      .isEqualTo(LocalDate.parse(checkoutDate))
 
     // 8. Close the client
     client.close()
@@ -399,7 +429,7 @@ Now for the interesting part, how do we test the AI agent’s response? This is 
 This aligns with the **evaluation techniques** described in Martin Fowler’s [Evals](https://martinfowler.com/articles/gen-ai-patterns/#evals) GenAI pattern:
 * **Self-evaluation**: The LLM evaluates its own response, but this can reinforce its own mistakes or biases.
 * **LLM as a judge**: Another model scores the output, reducing bias by introducing a second opinion.
-* **Human evaluation**: People manually review responses to ensure the tone and intent feel right. 
+* **Human evaluation**: People manually review responses to ensure the tone and intent feel right.
 
 To keep things simple, we’ll go with self-evaluation 🤓
 
@@ -407,42 +437,50 @@ Each test will follow this structure:
 
 ```kotlin
 fun `should do something`() {
-    // 1. Mock downstream service(s)
-    // Optionally use argument captors depending on how you plan to verify parameters in step 5
-    // Example for BookingService:
-    doReturn("Your booking is done!")
-      .whenever(bookingTestService).book(any(), any(), any())
+  // 1. Mock downstream service(s)
+  // Optionally use argument captors depending on how you plan
+  // to verify parameters in step 5
+  // Example for BookingService:
+  doReturn("Your booking is done!")
+    .whenever(bookingTestService).book(any(), any(), any())
 
-    // 2. Call the chat service
-    val chatId = UUID.randomUUID().toString()
-    val chatResponse = chatService.chat(chatId, "Can you book accommodation for Barcelona from 2025-04-15 to 2025-04-18?")
+  // 2. Call the chat service
+  val chatId = UUID.randomUUID().toString()
+  val chatResponse = chatService.chat(
+    chatId, 
+    "Can you book accommodation for Barcelona from 2025-04-15 to 2025-04-18?"
+  )
   
-    // 3. Evaluate the response using the AI model
-    val evaluationResult = TestEvaluator(chatClientBuilder) { evaluationRequest, userSpec ->
-      userSpec.text(
-        """
-            Your task is to evaluate if the answer given by an AI agent to a human user matches the claim.
-            Return YES if the answer matches the claim and NO if it does not.
-            After returning YES or NO, explain why.
-            Assume that today is ${LocalDate.now(clock)}.
-            Answer: {answer}
-            Claim: {claim}
-        """.trimIndent()
-      )
-        .param("answer", evaluationRequest.responseContent)
-        .param("claim", evaluationRequest.userText)
-    }.evaluate(EvaluationRequest("Accommodation has been booked Barcelona from 2025-04-15 to 2025-04-18", chatResponse))
-  
-    // 4. Assert the evaluation result is successful, show feedback if not
-    assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
-  
-    // 5. If applicable, verify the parameters passed to the service
-    // You can verify with argument captors or use the `verify` method as in the example below:
-    verify(bookingTestService).book(
-      eq("Barcelona"), 
-      eq(LocalDate.parse("2025-04-15")), 
-      eq(LocalDate.parse("2025-04-18"))
+  // 3. Evaluate the response using the AI model
+  val evaluationResult = TestEvaluator(chatClientBuilder) { evaluationRequest, userSpec ->
+    userSpec.text(
+      """
+      Your task is to evaluate if the answer given by an AI agent to a human user matches the claim.
+      Return YES if the answer matches the claim and NO if it does not.
+      After returning YES or NO, explain why.
+      Assume that today is ${LocalDate.now(clock)}.
+      Answer: {answer}
+      Claim: {claim}
+      """.trimIndent()
     )
+      .param("answer", evaluationRequest.responseContent)
+      .param("claim", evaluationRequest.userText)
+  }.evaluate(EvaluationRequest(
+    "Accommodation has been booked Barcelona from 2025-04-15 to 2025-04-18", 
+    chatResponse
+  ))
+  
+  // 4. Assert the evaluation result is successful, show feedback if not
+  assertThat(evaluationResult.isPass).isTrue
+    .withFailMessage { evaluationResult.feedback }
+  
+  // 5. If applicable, verify the parameters passed to the service
+  // You can verify with argument captors or use the `verify` method as in the example below:
+  verify(bookingTestService).book(
+    eq("Barcelona"), 
+    eq(LocalDate.parse("2025-04-15")), 
+    eq(LocalDate.parse("2025-04-18"))
+  )
 }
 ```
 
@@ -460,10 +498,10 @@ This whole setup can run locally without needing powerful hardware, the models a
 @Test
 @EnabledIfCI
 fun `should be up and running`() {
-    val chatId = UUID.randomUUID().toString()
-    val chatResponse = chatService.chat(chatId, "Hello!")
+  val chatId = UUID.randomUUID().toString()
+  val chatResponse = chatService.chat(chatId, "Hello!")
 
-    assertThat(chatResponse).isNotNull() // Any response is good 👌
+  assertThat(chatResponse).isNotNull() // Any response is good 👌
 }
 ```
 
@@ -519,7 +557,7 @@ To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/a
 * Configure the model in its own `application-<model>.yml` file
 * Activate the profile using `spring.profiles.active=<model>` in the main `application.yml` file
 
-For example, checkout the `bedrock` branch in this repo for the [AWS Bedrock](https://aws.amazon.com/bedrock/) model configuration.
+For example, check out the [bedrock](https://github.com/rogervinas/spring-boot-ai/tree/bedrock) branch for the [AWS Bedrock](https://aws.amazon.com/bedrock/) model configuration.
 
 ## Documentation
 
