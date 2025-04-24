@@ -29,6 +29,7 @@ val springAiVersion = "1.0.0-M7"
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.ai:spring-ai-starter-mcp-client")
+    implementation("org.springframework.ai:spring-ai-advisors-vector-store")
 
     // ollama
     implementation("org.springframework.ai:spring-ai-starter-model-ollama")
