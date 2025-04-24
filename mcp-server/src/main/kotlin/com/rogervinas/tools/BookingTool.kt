@@ -24,8 +24,8 @@ class BookingTool(private val bookingService: BookingService) {
     )
     fun book(
         @ToolParam(description = "the city to make the reservation for") city: String,
-        @ToolParam(description = "the check-in date, when the guest begins their stay") checkinDate: LocalDate,
-        @ToolParam(description = "the check-out date, when the guest ends their stay") checkoutDate: LocalDate
+        @ToolParam(description = "the check-in date, when the reservation begins") checkinDate: LocalDate,
+        @ToolParam(description = "the check-out date, when the reservation ends") checkoutDate: LocalDate
     ): String = bookingService.book(city, checkinDate, checkoutDate)
 }
 

@@ -440,6 +440,7 @@ To keep things simple, we’ll go with self-evaluation 🤓
 Each test will follow this structure:
 
 ```kotlin
+@Test
 fun `should do something`() {
   // 1. Mock downstream service(s)
   // Optionally use argument captors depending on how you plan
