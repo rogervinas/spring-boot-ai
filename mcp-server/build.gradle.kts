@@ -19,16 +19,16 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "1.0.0-M6"
+val springAiVersion = "1.0.0-M7"
 
 dependencies {
-    implementation("org.springframework.ai:spring-ai-mcp-server-webflux-spring-boot-starter")
+    implementation("org.springframework.ai:spring-ai-starter-mcp-server-webflux")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    testImplementation(platform("org.junit:junit-bom:5.12.1"))
+    testImplementation(platform("org.junit:junit-bom:5.12.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
