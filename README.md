@@ -3,7 +3,7 @@
 ![Java](https://img.shields.io/badge/Java-21-blue?labelColor=black)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.x-blue?labelColor=black)
 ![SpringBoot](https://img.shields.io/badge/SpringBoot-3.x-blue?labelColor=black)
-![SpringAI](https://img.shields.io/badge/SpringAI-1.0.0--M6-blue?labelColor=black)
+![SpringAI](https://img.shields.io/badge/SpringAI-1.0.0--M7-blue?labelColor=black)
 
 # Spring Boot AI
 
@@ -84,10 +84,10 @@ class BookingToolConfiguration {
 ### Chat Server
 
 The **Chat Server** is a Spring Boot application built with the following dependencies:
-* `org.springframework.boot:spring-boot-starter-web` or `-webflux` - to expose a REST API for the chat interface
-* `org.springframework.ai:spring-ai-mcp-client-spring-boot-starter` - to use MCP
-* `org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter` - to enable RAG with PGVector
-* `org.springframework.ai:spring-ai-ollama-spring-boot-starter` - to use Ollama models
+* `spring-boot-starter-web` or `-webflux` - to expose a REST API for the chat interface
+* `spring-ai-starter-mcp-client` - to use MCP
+* `spring-ai-starter-vector-store-pgvector` and `spring-ai-advisors-vector-store` - to enable RAG with PGVector
+* `spring-ai-starter-model-ollama` - to use Ollama models
 
 #### Components
 
