@@ -1,7 +1,7 @@
 version: 2
 updates:
   - package-ecosystem: gradle
-    directory: "/"
+    directory: "/mcp-server"
     schedule:
       interval: "weekly"
     groups:
@@ -9,12 +9,17 @@ updates:
         applies-to: version-updates
         patterns:
           - "*"
-  - package-ecosystem: github-actions
-    directory: /
+  - package-ecosystem: gradle
+    directory: "/chat-server"
     schedule:
-      interval: weekly
+      interval: "weekly"
+    groups:
+      dependencies:
+        applies-to: version-updates
+        patterns:
+          - "*"          
   - package-ecosystem: docker-compose
-    directory: /
+    directory: "/chat-server"
     schedule:
       interval: weekly
     groups:
@@ -22,3 +27,7 @@ updates:
         applies-to: version-updates
         patterns:
           - "*"
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
