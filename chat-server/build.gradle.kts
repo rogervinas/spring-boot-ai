@@ -28,16 +28,16 @@ val springAiVersion = "1.0.0-M7"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
-    implementation("org.springframework.ai:spring-ai-mcp-client-spring-boot-starter")
+    implementation("org.springframework.ai:spring-ai-starter-mcp-client")
 
     // ollama
-    implementation("org.springframework.ai:spring-ai-ollama-spring-boot-starter")
+    implementation("org.springframework.ai:spring-ai-starter-model-ollama")
 
     // bedrock
-    // implementation("org.springframework.ai:spring-ai-bedrock-converse-spring-boot-starter")
-    // implementation("org.springframework.ai:spring-ai-bedrock-ai-spring-boot-starter")
+    // implementation("org.springframework.ai:spring-ai-starter-model-bedrock")
+    // implementation("org.springframework.ai:spring-ai-starter-model-bedrock-converse")
 
-    implementation("org.springframework.ai:spring-ai-pgvector-store-spring-boot-starter")
+    implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
     runtimeOnly("org.postgresql:postgresql")
 
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
