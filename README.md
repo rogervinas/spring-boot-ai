@@ -318,7 +318,7 @@ spring:
     ollama:
       base-url: "http://localhost:11434"
       init:
-        pull-model-strategy: "always"
+        pull-model-strategy: "when_missing"
       chat:
         enabled: true
         options:
