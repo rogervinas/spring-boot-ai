@@ -24,7 +24,7 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "1.0.0-M7"
+val springAiVersion = "1.0.0-M8"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -41,7 +41,7 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.6")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.8")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
