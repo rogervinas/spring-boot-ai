@@ -76,6 +76,30 @@ class ChatServerApplicationTest {
         assertThat(chatResponse).isNotNull()
     }
 
+    @Test
+    @Order(0)
+    @DisabledIfCI
+    fun `should have access to tools`() {
+        val chatId = UUID.randomUUID().toString()
+        val chatResponse = chatService.chat(chatId, "What tools do you have available?")
+
+        val evaluationResult = TestEvaluator(chatClientBuilder) { evaluationRequest, userSpec ->
+            userSpec.text(
+                """
+                Your task is to evaluate if the answer given by an AI agent to a human user matches the claim.
+                Return YES if the answer matches the claim and NO if it does not.
+                After returning YES or NO, explain why.
+                Answer: {answer}
+                Claim: {claim}
+            """.trimIndent()
+            )
+                .param("answer", evaluationRequest.responseContent)
+                .param("claim", evaluationRequest.userText)
+        }.evaluate(EvaluationRequest("The AI agent has at least these three tools available: get date, get weather and book accommodation", chatResponse))
+
+        assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
+    }
+
     @ParameterizedTest
     @CsvSource(
         value = [
