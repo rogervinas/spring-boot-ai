@@ -148,6 +148,8 @@ spring:
   ai:
     mcp:
       client:
+        toolcallback:
+          enabled: true
         sse:
           connections:
             booking-tool:
@@ -292,6 +294,8 @@ spring:
   ai: 
    mcp:
       client:
+        toolcallback:
+          enabled: true
         sse:
           connections:
             booking-tool:
