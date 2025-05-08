@@ -20,7 +20,6 @@ import org.junit.jupiter.params.provider.ValueSource
 import org.mockito.Mockito.doAnswer
 import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.evaluation.EvaluationRequest
-import org.springframework.ai.tool.ToolCallbackProvider
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
@@ -59,9 +58,6 @@ class ChatServerApplicationTest {
 
     @Autowired
     lateinit var chatService: ChatService
-
-    @Autowired
-    lateinit var toolCallbackProviders: List<ToolCallbackProvider>
 
     @MockitoBean
     lateinit var weatherService: WeatherService
