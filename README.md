@@ -153,7 +153,7 @@ spring:
         sse:
           connections:
             booking-tool:
-              url: http://localhost:8081
+              url: "http://localhost:8081"
 ```
 
 You can find all the alternative configurations in [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
@@ -299,7 +299,7 @@ spring:
         sse:
           connections:
             booking-tool:
-              url: http://localhost:8081
+              url: "http://localhost:8081"
 
 server:
   port: 8080

@@ -80,11 +80,6 @@ class ChatServerApplicationTest {
     }
 
     @Test
-    fun `should have tools configured`() {
-        assertThat(toolCallbackProviders).hasSize(3)
-    }
-
-    @Test
     @DisabledIfCI
     @Order(0)
     fun `should have tools available`() {

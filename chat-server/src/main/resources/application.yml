@@ -16,7 +16,7 @@ spring:
         sse:
           connections:
             booking-tool:
-              url: http://localhost:8081
+              url: "http://localhost:8081"
 
 server:
   port: 8080
