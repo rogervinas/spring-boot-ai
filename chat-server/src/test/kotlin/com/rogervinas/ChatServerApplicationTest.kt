@@ -77,11 +77,11 @@ class ChatServerApplicationTest {
     }
 
     @Test
-    @Order(0)
     @DisabledIfCI
-    fun `should have access to tools`() {
+    @Order(0)
+    fun `should have tools available`() {
         val chatId = UUID.randomUUID().toString()
-        val chatResponse = chatService.chat(chatId, "What tools do you have available?")
+        val chatResponse = chatService.chat(chatId, "Please enumerate the list of tools you have available")
 
         val evaluationResult = TestEvaluator(chatClientBuilder) { evaluationRequest, userSpec ->
             userSpec.text(

@@ -40,7 +40,7 @@ jobs:
 
       - name: Build
         working-directory: chat-server
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon --info
 
       - name: Ollama cache permissions
         if: false # ollama disabled in this branch

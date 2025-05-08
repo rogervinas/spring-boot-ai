@@ -1,0 +1,5 @@
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+    <root level="ERROR"/>
+    <logger name="com.rogervinas" level="INFO"/>
+</configuration>

@@ -3,7 +3,7 @@
 ![Java](https://img.shields.io/badge/Java-21-blue?labelColor=black)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.x-blue?labelColor=black)
 ![SpringBoot](https://img.shields.io/badge/SpringBoot-3.x-blue?labelColor=black)
-![SpringAI](https://img.shields.io/badge/SpringAI-1.0.0--M8-blue?labelColor=black)
+![SpringAI](https://img.shields.io/badge/SpringAI-1.0.0--M7-blue?labelColor=black)
 
 # Spring Boot AI
 
@@ -153,7 +153,7 @@ spring:
         sse:
           connections:
             booking-tool:
-              url: http://localhost:8081
+              url: "http://localhost:8081"
 ```
 
 You can find all the alternative configurations in [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
@@ -299,7 +299,7 @@ spring:
         sse:
           connections:
             booking-tool:
-              url: http://localhost:8081
+              url: "http://localhost:8081"
 
 server:
   port: 8080
