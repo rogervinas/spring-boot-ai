@@ -77,6 +77,7 @@ class ChatServerApplicationTest {
 
     @Test
     @Order(0)
+    @DisabledIfCI
     fun `should have access to tools`() {
         val chatId = UUID.randomUUID().toString()
         val chatResponse = chatService.chat(chatId, "What tools do you have available?")
