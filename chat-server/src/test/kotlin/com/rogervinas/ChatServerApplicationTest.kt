@@ -76,7 +76,6 @@ class ChatServerApplicationTest {
     }
 
     @Test
-    @DisabledIfCI
     @Order(0)
     fun `should have tools available`() {
         val chatId = UUID.randomUUID().toString()

@@ -30,6 +30,6 @@ class ChatClientConfiguration {
         """.trimIndent()
         return builder
             .defaultSystem(system)
-            .defaultTools(*toolCallbackProviders.toTypedArray())
+            .defaultToolCallbacks(*toolCallbackProviders.toTypedArray())
     }
 }
