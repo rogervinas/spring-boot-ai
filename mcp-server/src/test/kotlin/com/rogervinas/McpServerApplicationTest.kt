@@ -34,7 +34,7 @@ class McpServerApplicationTest {
     val port: Int = 0
 
     val client: McpSyncClient by lazy {
-        McpClient.sync(HttpClientSseClientTransport("http://localhost:$port")).build().apply {
+        McpClient.sync(HttpClientSseClientTransport.builder("http://localhost:$port").build()).build().apply {
             initialize()
             ping()
         }

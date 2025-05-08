@@ -31,4 +31,4 @@ jobs:
 
       - name: Build
         working-directory: mcp-server
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon --info

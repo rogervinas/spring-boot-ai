@@ -39,7 +39,7 @@ jobs:
 
       - name: Build
         working-directory: chat-server
-        run: ./gradlew build --no-daemon
+        run: ./gradlew build --no-daemon --info
 
       - name: Ollama cache permissions
         run: sudo chown -R $USER:$USER ./chat-server/.ollama
