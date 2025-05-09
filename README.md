@@ -319,17 +319,19 @@ In the `ollama` profile configuration file, `application-ollama.yml`, we configu
 ```yaml
 spring:
   ai:
+    model:
+      embedding: "ollama"
+      chat: "ollama"
     ollama:
       base-url: "http://localhost:11434"
       init:
         pull-model-strategy: "when_missing"
       chat:
-        enabled: true
         options:
           model: "llama3.1:8b"
       embedding:
-        enabled: true
-        model: "nomic-embed-text"
+        options:
+          model: "nomic-embed-text"
     vectorstore:
       pgvector:
         dimensions: 768
