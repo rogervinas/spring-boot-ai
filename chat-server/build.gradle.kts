@@ -4,7 +4,7 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import java.util.Properties
 
 plugins {
-    val kotlinVersion = "2.1.20"
+    val kotlinVersion = "2.1.21"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("org.springframework.boot") version "3.4.5"
@@ -24,7 +24,7 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "1.0.0-M8"
+val springAiVersion = "1.0.0-RC1"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
