@@ -3,7 +3,7 @@
 ![Java](https://img.shields.io/badge/Java-21-blue?labelColor=black)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.x-blue?labelColor=black)
 ![SpringBoot](https://img.shields.io/badge/SpringBoot-3.x-blue?labelColor=black)
-![SpringAI](https://img.shields.io/badge/SpringAI-1.0.0--M8-blue?labelColor=black)
+![SpringAI](https://img.shields.io/badge/SpringAI-1.0.0--RC1-blue?labelColor=black)
 
 # Spring Boot AI
 
