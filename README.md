@@ -196,7 +196,7 @@ class ChatClientConfiguration {
 
 The **Chat Service** exposes a single `chat` method that takes a chat ID and a user question. It calls the **Chat Client** with the user question along with a set of advisors to enrich the interaction:
 * **QuestionAnswerAdvisor** - retrieves relevant context from a vector store and injects it to the context (RAG)
-* **PromptChatMemoryAdvisor** - retrieves or creates an `InMemoryChatMemory` for the given chat ID and adds it to the context
+* **PromptChatMemoryAdvisor** - retrieves or creates an `InMemoryChatMemoryRepository` for the given chat ID and adds it to the context
 * **SimpleLoggerAdvisor** - logs internal advisor traces to the console (if `logging.level.org.springframework.ai.chat.client.advisor` is set to `DEBUG`)
 
 Additionally, the question and answer are logged to the console.
@@ -216,7 +216,11 @@ class ChatService(
 
   fun chat(chatId: String, question: String): String? {
     val chatMemoryAdvisor = chatMemory.computeIfAbsent(chatId) {
-      PromptChatMemoryAdvisor.builder(InMemoryChatMemory()).build()
+      PromptChatMemoryAdvisor.builder(
+        MessageWindowChatMemory.builder()
+          .chatMemoryRepository(InMemoryChatMemoryRepository())
+          .build()
+      ).build()
     }
     return chatClient
       .prompt()

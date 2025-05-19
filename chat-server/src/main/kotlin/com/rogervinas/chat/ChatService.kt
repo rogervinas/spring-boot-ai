@@ -5,7 +5,8 @@ import org.springframework.ai.chat.client.ChatClient
 import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor
-import org.springframework.ai.chat.memory.InMemoryChatMemory
+import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository
+import org.springframework.ai.chat.memory.MessageWindowChatMemory
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.stereotype.Service
 import java.util.concurrent.ConcurrentHashMap
@@ -20,7 +21,11 @@ class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) 
 
     fun chat(chatId: String, question: String): String? {
         val chatMemoryAdvisor = chatMemory.computeIfAbsent(chatId) {
-            PromptChatMemoryAdvisor.builder(InMemoryChatMemory()).build()
+            PromptChatMemoryAdvisor.builder(
+                MessageWindowChatMemory.builder()
+                    .chatMemoryRepository(InMemoryChatMemoryRepository())
+                    .build()
+            ).build()
         }
         return chatClient
             .prompt()
