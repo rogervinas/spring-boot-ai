@@ -26,6 +26,8 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
 
 ![Diagram](.doc/diagram.png)
 
+This project is indexed and certified by [MCP Review](https://mcpreview.com/mcp-servers/rogervinas/spring-boot-ai)
+
 * [Implementation](#implementation)
   * [MCP Server](#mcp-server)
   * [Chat Server](#chat-server)
