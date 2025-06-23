@@ -7,7 +7,7 @@ plugins {
     val kotlinVersion = "2.1.21"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
-    id("org.springframework.boot") version "3.5.0"
+    id("org.springframework.boot") version "3.5.3"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -56,7 +56,7 @@ dependencies {
     testImplementation("org.mockito:mockito-junit-jupiter:5.18.0")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
 
-    testImplementation("org.testcontainers:junit-jupiter:1.21.1")
+    testImplementation("org.testcontainers:junit-jupiter:1.21.2")
 }
 
 dependencyManagement {
