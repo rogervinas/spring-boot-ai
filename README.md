@@ -13,6 +13,8 @@ In this example, inspired by [Building Agents with AWS: Complete Tutorial](https
 * Retrieval Augmented Generation ([RAG](https://docs.spring.io/spring-ai/reference/api/retrieval-augmented-generation.html))
 * Testing with [AI Model Evaluation](https://docs.spring.io/spring-ai/reference/api/testing.html) 🤩
 
+This project is indexed and certified by [MCP Review](https://mcpreview.com/mcp-servers/rogervinas/spring-boot-ai)
+
 The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but one of the great things about **Spring AI** is that with just a few config tweaks and dependency changes, the same code works with any other supported model. In our case, we’ll use [Ollama](https://ollama.com/), which will hopefully let us run locally and in CI without heavy hardware requirements 🙏
 
 The application features an AI agent that helps users book accommodations in tourist destinations.
