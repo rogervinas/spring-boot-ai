@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "2.2.10"
+    val kotlinVersion = "2.2.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("org.springframework.boot") version "3.5.5"
@@ -19,7 +19,7 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "1.0.1"
+val springAiVersion = "1.0.2"
 
 dependencies {
     implementation("org.springframework.ai:spring-ai-starter-mcp-server-webflux")
