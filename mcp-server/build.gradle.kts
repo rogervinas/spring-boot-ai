@@ -1,8 +1,8 @@
 plugins {
-    val kotlinVersion = "2.2.10"
+    val kotlinVersion = "2.2.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
-    id("org.springframework.boot") version "3.5.5"
+    id("org.springframework.boot") version "3.5.6"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -19,7 +19,7 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "1.0.1"
+val springAiVersion = "1.0.2"
 
 dependencies {
     implementation("org.springframework.ai:spring-ai-starter-mcp-server-webflux")
@@ -33,8 +33,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("org.mockito:mockito-core:5.19.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.19.0")
+    testImplementation("org.mockito:mockito-core:5.20.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.20.0")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
 }
 
