@@ -212,7 +212,7 @@ class ChatService(
   private val chatClient: ChatClient
 ) {
   private val logger = LoggerFactory.getLogger(ChatService::class.java)
-  private val questionAnswerAdvisor = QuestionAnswerAdvisor(vectorStore)
+  private val questionAnswerAdvisor = QuestionAnswerAdvisor.builder(vectorStore).build()
   private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
   private val chatMemory = ConcurrentHashMap<String, PromptChatMemoryAdvisor>()
 
