@@ -7,7 +7,7 @@ plugins {
     val kotlinVersion = "2.2.21"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "4.0.0"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -41,7 +41,7 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
