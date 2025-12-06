@@ -45,7 +45,6 @@ class ChatServerApplicationTest {
         @Container
         @JvmStatic
         val container = ComposeContainer(File("docker-compose.yml"))
-            .withLocalCompose(true)
             .withExposedService("vectordb", 5432, forLogMessage(".*database system is ready to accept connections.*", 1))
             .withExposedService("ollama", 11434, forLogMessage(".*inference compute.*", 1))
     }
