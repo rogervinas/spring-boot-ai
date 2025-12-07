@@ -2,8 +2,8 @@
 [![chat-server](https://github.com/rogervinas/spring-boot-ai/actions/workflows/ci-chat-server.yml/badge.svg)](https://github.com/rogervinas/spring-boot-ai/actions/workflows/ci-chat-server.yml)
 ![Java](https://img.shields.io/badge/Java-21-blue?labelColor=black)
 ![Kotlin](https://img.shields.io/badge/Kotlin-2.x-blue?labelColor=black)
-![SpringBoot](https://img.shields.io/badge/SpringBoot-3.x-blue?labelColor=black)
-![SpringAI](https://img.shields.io/badge/SpringAI-1.x-blue?labelColor=black)
+![SpringBoot](https://img.shields.io/badge/SpringBoot-4.x-blue?labelColor=black)
+![SpringAI](https://img.shields.io/badge/SpringAI-2.0.0--SNAPSHOT-blue?labelColor=black)
 
 # Spring Boot AI
 
