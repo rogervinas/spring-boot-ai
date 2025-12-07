@@ -7,7 +7,7 @@ plugins {
     val kotlinVersion = "2.2.21"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
-    id("org.springframework.boot") version "3.5.7"
+    id("org.springframework.boot") version "4.0.0"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -22,14 +22,21 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
-val springAiVersion = "1.1.0"
+val springAiVersion = "2.0.0-SNAPSHOT"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
+    implementation("org.springframework.boot:spring-boot-starter-webclient")
+    implementation("org.springframework.boot:spring-boot-starter-jackson")
     implementation("org.springframework.ai:spring-ai-starter-mcp-client")
     implementation("org.springframework.ai:spring-ai-advisors-vector-store")
+
+    // TODO remove when spring-ai is updated to use Jackson 3
+    implementation("org.springframework.boot:spring-boot-jackson2")
 
     // ollama
     implementation("org.springframework.ai:spring-ai-starter-model-ollama")
@@ -41,11 +48,13 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.14")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
+    testImplementation("org.springframework.boot:spring-boot-webmvc-test")
+    testImplementation("org.springframework.boot:spring-boot-webflux-test")
 
     testImplementation(platform("org.junit:junit-bom:6.0.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
@@ -62,6 +71,11 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom("org.springframework.ai:spring-ai-bom:$springAiVersion")
+        dependencies {
+            // TODO remove this when everything is stable
+            dependency("io.modelcontextprotocol.sdk:mcp:0.17.0")
+            dependency("org.springaicommunity:mcp-annotations:0.8.0")
+        }
     }
 }
 
