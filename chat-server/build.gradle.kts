@@ -22,12 +22,15 @@ java {
 
 repositories {
     mavenCentral()
+    maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
-val springAiVersion = "1.1.1"
+val springAiVersion = "2.0.0-SNAPSHOT"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
+    implementation("org.springframework.boot:spring-boot-starter-restclient")
+    implementation("org.springframework.boot:spring-boot-starter-webclient")
     implementation("org.springframework.ai:spring-ai-starter-mcp-client")
     implementation("org.springframework.ai:spring-ai-advisors-vector-store")
 

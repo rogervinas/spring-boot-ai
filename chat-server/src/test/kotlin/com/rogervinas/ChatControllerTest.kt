@@ -14,6 +14,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import java.util.UUID
 
 @WebMvcTest(ChatController::class)
+@AutoConfigureWebTestClient
 class ChatControllerTest {
 
     @Autowired
