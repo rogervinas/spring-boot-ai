@@ -7,6 +7,7 @@ import com.rogervinas.chat.ChatService
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.boot.webclient.test.autoconfigure.AutoConfigureWebClient
 import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest
 import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
 import org.springframework.test.context.bean.override.mockito.MockitoBean
@@ -14,7 +15,7 @@ import org.springframework.test.web.reactive.server.WebTestClient
 import java.util.UUID
 
 @WebMvcTest(ChatController::class)
-@AutoConfigureWebTestClient
+@AutoConfigureWebClient
 class ChatControllerTest {
 
     @Autowired
