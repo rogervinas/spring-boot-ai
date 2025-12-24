@@ -216,7 +216,7 @@ class ChatService(
   private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
   private val chatMemory = ConcurrentHashMap<String, PromptChatMemoryAdvisor>()
 
-  fun chat(chatId: String, question: String): String? {
+  fun chat(chatId: String, question: String): String {
     val chatMemoryAdvisor = chatMemory.computeIfAbsent(chatId) {
       PromptChatMemoryAdvisor.builder(
         MessageWindowChatMemory.builder()
@@ -232,7 +232,7 @@ class ChatService(
       .content().apply {
         logger.info("Chat #$chatId question: $question")
         logger.info("Chat #$chatId answer: $this")
-      }
+      }!!
   }
 }
 ```
