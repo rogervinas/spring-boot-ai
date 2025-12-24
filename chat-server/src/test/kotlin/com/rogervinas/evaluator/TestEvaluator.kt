@@ -29,7 +29,7 @@ open class TestEvaluator(
         return EvaluationResponse(
             evaluationResponse!!.contains("YES"),
             evaluationResponse,
-            mutableMapOf<String?, Any?>()
+            mutableMapOf<String, Any>()
         ).apply {
             logger.info("Evaluation isPass=${this.isPass} feedback=${this.feedback}")
         }
