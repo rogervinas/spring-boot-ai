@@ -48,7 +48,7 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
     runtimeOnly("org.postgresql:postgresql")
 
-    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.0")
+    implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.1")
 
     implementation("org.jetbrains.kotlin:kotlin-reflect")
 
@@ -56,7 +56,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-webflux-test")
 
-    testImplementation(platform("org.junit:junit-bom:6.0.1"))
+    testImplementation(platform("org.junit:junit-bom:6.0.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
@@ -73,7 +73,7 @@ dependencyManagement {
         mavenBom("org.springframework.ai:spring-ai-bom:$springAiVersion")
         dependencies {
             // TODO remove this when everything is stable
-            dependency("io.modelcontextprotocol.sdk:mcp:0.17.0")
+            dependency("io.modelcontextprotocol.sdk:mcp:0.17.1")
             dependency("org.springaicommunity:mcp-annotations:0.8.0")
         }
     }
