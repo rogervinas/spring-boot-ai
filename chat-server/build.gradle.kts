@@ -71,11 +71,6 @@ dependencies {
 dependencyManagement {
     imports {
         mavenBom("org.springframework.ai:spring-ai-bom:$springAiVersion")
-        dependencies {
-            // TODO remove this when everything is stable
-            dependency("io.modelcontextprotocol.sdk:mcp:0.17.2")
-            dependency("org.springaicommunity:mcp-annotations:0.8.0")
-        }
     }
 }
 
