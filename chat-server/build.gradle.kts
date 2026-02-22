@@ -22,10 +22,9 @@ java {
 
 repositories {
     mavenCentral()
-    maven { url = uri("https://repo.spring.io/snapshot") }
 }
 
-val springAiVersion = "2.0.0-SNAPSHOT"
+val springAiVersion = "2.0.0-M2"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
