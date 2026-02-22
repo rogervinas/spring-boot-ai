@@ -9,9 +9,13 @@ services:
       - "5432:5432"
 
   ollama:
+<<<<<<< bedrock
     image: ollama/ollama:0.13.5
     profiles:
       - disabled # ollama disabled in this branch
+=======
+    image: ollama/ollama:0.15.6
+>>>>>>> main
     volumes:
       - ./.ollama:/root/.ollama
     ports:
