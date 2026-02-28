@@ -42,4 +42,5 @@ jobs:
         run: ./gradlew build --no-daemon --info
 
       - name: Ollama cache permissions
+        if: false # ollama disabled in this branch
         run: sudo chown -R $USER:$USER ./chat-server/.ollama

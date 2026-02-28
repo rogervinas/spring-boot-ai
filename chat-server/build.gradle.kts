@@ -38,11 +38,11 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-jackson2")
 
     // ollama
-    implementation("org.springframework.ai:spring-ai-starter-model-ollama")
+    // implementation("org.springframework.ai:spring-ai-starter-model-ollama")
 
     // bedrock
-    // implementation("org.springframework.ai:spring-ai-starter-model-bedrock")
-    // implementation("org.springframework.ai:spring-ai-starter-model-bedrock-converse")
+    implementation("org.springframework.ai:spring-ai-starter-model-bedrock")
+    implementation("org.springframework.ai:spring-ai-starter-model-bedrock-converse")
 
     implementation("org.springframework.ai:spring-ai-starter-vector-store-pgvector")
     runtimeOnly("org.postgresql:postgresql")
