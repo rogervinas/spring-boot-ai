@@ -34,9 +34,6 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-starter-mcp-client")
     implementation("org.springframework.ai:spring-ai-advisors-vector-store")
 
-    // TODO remove when spring-ai is updated to use Jackson 3
-    implementation("org.springframework.boot:spring-boot-jackson2")
-
     // ollama
     implementation("org.springframework.ai:spring-ai-starter-model-ollama")
 
