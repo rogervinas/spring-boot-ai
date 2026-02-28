@@ -9,7 +9,7 @@ services:
       - "5432:5432"
 
   ollama:
-    image: ollama/ollama:0.15.6
+    image: ollama/ollama:0.16.3
     volumes:
       - ./.ollama:/root/.ollama
     ports:
