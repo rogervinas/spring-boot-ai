@@ -390,14 +390,14 @@ class McpServerApplicationTest {
 
     // 5. Call the tool
     val city = "Barcelona"
-    val checkinDate = "2025-04-15"
-    val checkoutDate = "2025-04-18"
+    val checkinDate = LocalDate.parse("2025-04-15")
+    val checkoutDate = LocalDate.parse("2025-04-18")
     val result = client.callTool(CallToolRequest(
       "book",
       mapOf(
         "city" to city,
-        "checkinDate" to checkinDate,
-        "checkoutDate" to checkoutDate
+        "checkinDate" to checkinDate.toEpochDay(),
+        "checkoutDate" to checkoutDate.toEpochDay()
       )
     ))
 
@@ -414,9 +414,9 @@ class McpServerApplicationTest {
     assertThat(cityCaptor.allValues).singleElement()
       .isEqualTo(city)
     assertThat(checkinDateCaptor.allValues).singleElement()
-      .isEqualTo(LocalDate.parse(checkinDate))
+      .isEqualTo(checkinDate)
     assertThat(checkoutDateCaptor.allValues).singleElement()
-      .isEqualTo(LocalDate.parse(checkoutDate))
+      .isEqualTo(checkoutDate)
 
     // 8. Close the client
     client.close()
