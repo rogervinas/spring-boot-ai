@@ -1,6 +1,5 @@
 package com.rogervinas
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.ai.document.Document
 import org.springframework.ai.vectorstore.VectorStore
@@ -11,6 +10,7 @@ import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.core.JdbcTemplate
+import tools.jackson.databind.json.JsonMapper
 
 @SpringBootApplication
 class ChatServerApplication
@@ -24,14 +24,14 @@ class VectorStoreConfiguration {
     fun vectorStoreInitializer(
         vectorStore: VectorStore,
         jdbcTemplate: JdbcTemplate,
-        objectMapper: ObjectMapper
+        jsonMapper: JsonMapper
     ) = ApplicationRunner {
         val logger = LoggerFactory.getLogger(ChatServerApplication::class.java)
         val vectorStoreCount = vectorStoreCount(jdbcTemplate)
         if (vectorStoreCount == 0) {
             logger.info("Initializing vector store ...")
             val cities = ClassPathResource("cities.json").inputStream.use {
-                objectMapper.readValue(it, Array<City>::class.java).toList()
+                jsonMapper.readValue(it, Array<City>::class.java).toList()
             }
             cities.forEach { city ->
                 logger.info("Adding ${city.name} to vector store ...")
