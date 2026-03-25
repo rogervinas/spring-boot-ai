@@ -4,10 +4,10 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import java.util.Properties
 
 plugins {
-    val kotlinVersion = "2.3.10"
+    val kotlinVersion = "2.3.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
-    id("org.springframework.boot") version "4.0.3"
+    id("org.springframework.boot") version "4.0.4"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -24,7 +24,7 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "2.0.0-M2"
+val springAiVersion = "2.0.0-M3"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -57,8 +57,8 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-    testImplementation("org.mockito:mockito-core:5.22.0")
-    testImplementation("org.mockito:mockito-junit-jupiter:5.22.0")
+    testImplementation("org.mockito:mockito-core:5.23.0")
+    testImplementation("org.mockito:mockito-junit-jupiter:5.23.0")
     testImplementation("com.nhaarman.mockitokotlin2:mockito-kotlin:2.2.0")
 
     testImplementation("org.testcontainers:junit-jupiter:1.21.4")

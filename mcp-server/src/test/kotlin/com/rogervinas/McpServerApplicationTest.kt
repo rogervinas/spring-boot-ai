@@ -68,15 +68,15 @@ class McpServerApplicationTest {
             .book(cityCaptor.capture(), checkinDateCaptor.capture(), checkoutDateCaptor.capture())
 
         val city = "Barcelona"
-        val checkinDate = "2025-04-15"
-        val checkoutDate = "2025-04-18"
+        val checkinDate = LocalDate.parse("2025-04-15")
+        val checkoutDate = LocalDate.parse("2025-04-18")
         val result = client.callTool(
             CallToolRequest(
                 "book",
                 mapOf(
                     "city" to city,
-                    "checkinDate" to checkinDate,
-                    "checkoutDate" to checkoutDate
+                    "checkinDate" to checkinDate.toEpochDay(),
+                    "checkoutDate" to checkoutDate.toEpochDay()
                 )
             )
         )
@@ -87,7 +87,7 @@ class McpServerApplicationTest {
             assertThat(it.text).isEqualTo("\"$bookResult\"")
         }
         assertThat(cityCaptor.allValues).singleElement().isEqualTo(city)
-        assertThat(checkinDateCaptor.allValues).singleElement().isEqualTo(LocalDate.parse(checkinDate))
-        assertThat(checkoutDateCaptor.allValues).singleElement().isEqualTo(LocalDate.parse(checkoutDate))
+        assertThat(checkinDateCaptor.allValues).singleElement().isEqualTo(checkinDate)
+        assertThat(checkoutDateCaptor.allValues).singleElement().isEqualTo(checkoutDate)
     }
 }
