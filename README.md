@@ -153,19 +153,11 @@ class WeatherToolConfiguration {
 
 #### Booking Tool
 
-To set up the **Booking Tool** as a remote MCP tool, we just need to configure the MCP client [SSE connection](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html#_sse_transport_properties)  in `application.yml`:
+To set up the **Booking Tool** as a remote MCP tool, we just need to configure the MCP client [SSE connection](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html#_sse_transport_properties)  in [application.properties](chat-server/src/main/resources/application.properties):
 
-```yaml
-spring:
-  ai:
-    mcp:
-      client:
-        toolcallback:
-          enabled: true
-        sse:
-          connections:
-            booking-tool:
-              url: "http://localhost:8081"
+```properties
+spring.ai.mcp.client.toolcallback.enabled=true
+spring.ai.mcp.client.sse.connections.booking-tool.url=http://localhost:8081
 ```
 
 You can find all the alternative configurations in [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
@@ -293,48 +285,40 @@ You can find the full version of `vectorStoreInitializer` in [ChatServerApplicat
 
 ## Configuration
 
-In the main `application.yml` file, we define global configuration values:
+We use [application.properties](chat-server/src/main/resources/application.properties) instead of `application.yml` because YAML cannot have both `spring.ai.model.embedding` (scalar, used by Bedrock and Ollama) and `spring.ai.model.embedding.text` (nested, used by Gemini) at the same time. Maybe some day this will be solved, but anyway this is a PoC that supports multiple models — in a production application you'd likely use only one, so this wouldn't be an issue.
+
+In this file, we define global configuration values:
+* Disable all model auto-configurations by default.
 * Configure the datasource to connect to a PostgreSQL database with PGVector support.
 * Set the server port to `8080`.
 * Configure the URL of the remote **Booking Tool** MCP server.
 * Set the logging level for chat advisor debug traces.
 
-```yaml
-spring:
-  application:
-    name: chat-server
-  datasource:
-    url: "jdbc:postgresql://localhost:5432/postgres"
-    username: "postgres"
-    password: "password"
-    driver-class-name: org.postgresql.Driver
-  ai:
-    model:
-      chat: none
-      embedding:
-        text: none
-    mcp:
-      client:
-        toolcallback:
-          enabled: true
-        sse:
-          connections:
-            booking-tool:
-              url: "http://localhost:8081"
+```properties
+spring.application.name=chat-server
 
-server:
-  port: 8080
+spring.datasource.url=jdbc:postgresql://localhost:5432/postgres
+spring.datasource.username=postgres
+spring.datasource.password=password
+spring.datasource.driver-class-name=org.postgresql.Driver
 
-logging:
-  level:
-    org.springframework.ai.chat.client.advisor: INFO
+spring.ai.model.chat=none
+spring.ai.model.embedding=none
+spring.ai.model.embedding.text=none
+
+spring.ai.mcp.client.toolcallback.enabled=true
+spring.ai.mcp.client.sse.connections.booking-tool.url=http://localhost:8081
+
+server.port=8080
+
+logging.level.org.springframework.ai.chat.client.advisor=INFO
 ```
 
 The AI model is configured via Spring profiles. Each profile sets the chat model, embedding model, and vector store dimensions. The active profile must be specified at runtime using `SPRING_PROFILES_ACTIVE`.
 
 ### Ollama profile
 
-In `application-ollama.yml`, we configure **Spring AI** to use Ollama models:
+In [application-ollama.yml](chat-server/src/main/resources/application-ollama.yml), we configure **Spring AI** to use Ollama models:
 * Set the base URL for the Ollama server to `http://localhost:11434`.
 * Set the chat model to [llama3.1:8b](https://ollama.com/library/llama3.1:8b) (must be a **tools**-enabled model).
 * Set the embedding model to [nomic-embed-text](https://ollama.com/library/nomic-embed-text).
@@ -366,7 +350,7 @@ spring:
 
 ### Gemini profile
 
-In `application-gemini.yml`, we configure **Spring AI** to use Google Gemini models:
+In [application-gemini.yml](chat-server/src/main/resources/application-gemini.yml), we configure **Spring AI** to use Google Gemini models:
 * Set the Google API key from the `GOOGLE_API_KEY` environment variable.
 * Set the chat model to `gemini-2.5-flash`.
 * Set the embedding model to `gemini-embedding-001` with 768 dimensions.
@@ -401,7 +385,7 @@ spring:
 
 ### Bedrock profile
 
-In `application-bedrock.yml`, we configure **Spring AI** to use AWS Bedrock models:
+In [application-bedrock.yml](chat-server/src/main/resources/application-bedrock.yml), we configure **Spring AI** to use AWS Bedrock models:
 * Set the AWS credentials and region from environment variables.
 * Set the chat model using Bedrock Converse API.
 * Set the embedding model using Bedrock Cohere.
