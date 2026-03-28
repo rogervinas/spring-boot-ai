@@ -8,6 +8,7 @@ import com.rogervinas.configuration.BookingTestService
 import com.rogervinas.evaluator.TestEvaluator
 import com.rogervinas.tools.WeatherService
 import org.assertj.core.api.Assertions.assertThat
+import kotlin.time.toJavaDuration
 import org.junit.jupiter.api.extension.AfterEachCallback
 import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.MethodOrderer
@@ -33,6 +34,7 @@ import java.io.File
 import java.time.Clock
 import java.time.LocalDate
 import java.util.UUID
+import kotlin.time.Duration.Companion.minutes
 
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
@@ -305,7 +307,7 @@ class SlowDownExtension : AfterEachCallback {
     override fun afterEach(context: ExtensionContext) {
         // Adds a delay between tests on CI to avoid hitting Gemini free-tier rate limits.
         if (System.getenv("CI") != null) {
-            Thread.sleep(30_000)
+            Thread.sleep(1.minutes.toJavaDuration())
         }
     }
 }
