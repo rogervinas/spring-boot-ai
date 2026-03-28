@@ -1,16 +1,16 @@
 name: chat-server
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - .github/workflows/ci-chat-server.yml
-      - chat-server/**
+  # Only on PRs, not on push to main — avoid Gemini API quota usage since tests already ran on the PR branch
   pull_request:
     branches: [ main ]
     paths:
       - .github/workflows/ci-chat-server.yml
       - chat-server/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
