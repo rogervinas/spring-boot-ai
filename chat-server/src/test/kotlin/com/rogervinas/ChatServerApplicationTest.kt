@@ -8,10 +8,13 @@ import com.rogervinas.configuration.BookingTestService
 import com.rogervinas.evaluator.TestEvaluator
 import com.rogervinas.tools.WeatherService
 import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.extension.AfterEachCallback
+import org.junit.jupiter.api.extension.ExtensionContext
 import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
+import org.junit.jupiter.api.extension.ExtendWith
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
@@ -34,6 +37,7 @@ import java.util.UUID
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
+@ExtendWith(SlowDownExtension::class)
 @Testcontainers
 class ChatServerApplicationTest {
 
@@ -294,5 +298,14 @@ class ChatServerApplicationTest {
         }.evaluate(EvaluationRequest("Accommodation cannot be booked for the requested dates", chatResponse))
 
         assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
+    }
+}
+
+class SlowDownExtension : AfterEachCallback {
+    override fun afterEach(context: ExtensionContext) {
+        // Adds a delay between tests on CI to avoid hitting Gemini free-tier rate limits.
+        if (System.getenv("CI") != null) {
+            Thread.sleep(30_000)
+        }
     }
 }
