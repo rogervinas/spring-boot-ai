@@ -27,6 +27,7 @@ class ChatClientConfiguration {
         Do not include any indication of what you're thinking.
         Use the tools available to you to answer the questions.
         Just give the answer.
+        Current date: {currentDate}
         """.trimIndent()
         return builder
             .defaultSystem(system)

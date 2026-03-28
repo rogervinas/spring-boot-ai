@@ -20,11 +20,10 @@ The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but on
 The application features an AI agent that helps users book accommodations in tourist destinations.
 
 Through **MCP**, the agent can use the following tools:
-* **Clock Tool**: Provides the current date.
 * **Weather Tool**: Retrieves weather information for a specific city and date.
 * **Booking Tool**: Books accommodations in a city for a specific date.
 
-The **Clock** and **Weather** tools will be implemented locally using **MCP**, while the **Booking** tool will be provided by a remote **MCP server**. Additional information about cities will be retrieved from a vector store using **RAG**.
+The **Weather** tool will be implemented locally using **MCP**, while the **Booking** tool will be provided by a remote **MCP server**. The current date is provided via the system prompt. Additional information about cities will be retrieved from a vector store using **RAG**.
 
 ![Diagram](.doc/diagram.png)
 
@@ -32,7 +31,7 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
   * [MCP Server](#mcp-server)
   * [Chat Server](#chat-server)
     * [Components](#components)
-      * [Weather and Clock Tools](#weather-and-clock-tools)
+      * [Weather Tool](#weather-tool)
       * [Booking Tool](#booking-tool)
       * [Chat Client](#chat-client)
       * [Chat Service](#chat-service)
@@ -103,12 +102,11 @@ The **Chat Server** is a Spring Boot application built with the following depend
 
 * **MCP Tools**
   * **Weather Tool** - a local MCP tool that queries a **WeatherService** for the weather in a given city on a given date
-  * **Clock Tool** - a local MCP tool that returns the system date, letting us control the date the AI agent uses to avoid unpredictability
   * **Booking Tool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
 * **Chat**
   * **Chat Client** - a **Spring AI** ChatClient configured with:
-    * A system prompt to define the AI agent’s role
-    * The Ollama model autoconfigured by Spring Boot
+    * A system prompt to define the AI agent’s role and the current date
+    * The AI model autoconfigured by Spring Boot via the active profile
     * The above MCP tools as part of the AI agent’s toolset
   * **Chat Service** - wraps the **Chat Client** and adds three advisors:
     * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
@@ -119,9 +117,9 @@ The **Chat Server** is a Spring Boot application built with the following depend
 
 Let's implement this step by step ...
 
-#### Weather and Clock Tools
+#### Weather Tool
 
-Here's how the **Weather Tool** is implemented (the same applies to **Clock Tool**):
+Here's how the **Weather Tool** is implemented:
 
 1. Create an instance and annotate it with `@Tool` and `@ToolParam`:
 ```kotlin
@@ -194,6 +192,7 @@ class ChatClientConfiguration {
       Do not include any indication of what you're thinking.
       Use the tools available to you to answer the questions.
       Just give the answer.
+      Current date: {currentDate}
       """.trimIndent()
     return builder
       .defaultSystem(system)
@@ -216,7 +215,8 @@ Here’s the implementation:
 ```kotlin
 @Service // or @Bean / @Component
 class ChatService(
-  vectorStore: VectorStore, 
+  vectorStore: VectorStore,
+  private val clock: Clock,
   private val chatClient: ChatClient
 ) {
   private val logger = LoggerFactory.getLogger(ChatService::class.java)
@@ -234,6 +234,7 @@ class ChatService(
     }
     return chatClient
       .prompt()
+      .system { it.param("currentDate", LocalDate.now(clock)) }
       .user(question)
       .advisors(questionAnswerAdvisor, chatMemoryAdvisor, simpleLoggerAdvisor)
       .call()
@@ -509,9 +510,9 @@ To test the **Chat Server**, we will:
   * Disable the MCP client with `spring.ai.mcp.client.enabled: false` in `application-test.yml`.
   * Create the local **Book Testing Tool** in [BookingTestToolConfiguration.kt](chat-server/src/main/kotlin/com/rogervinas/BookingTestToolConfiguration.kt).
 * Mock the downstream services **Weather Service** and **Booking Service** with `MockitoBean`.
-* Create a fixed **Clock** to control the date in [ClockTestToolConfiguration.kt](chat-server/src/test/kotlin/com/rogervinas/configuration/ClockTestToolConfiguration.kt)
+* Create a fixed **Clock** to control the current date in [ClockTestToolConfiguration.kt](chat-server/src/test/kotlin/com/rogervinas/configuration/ClockTestToolConfiguration.kt)
   * Declare it as `@Primary @Bean` to override the default `Clock` bean.
-* Start Docker Compose with both Ollama and PGVector using [Testcontainers](https://testcontainers.com/)
+* Start Docker Compose with PGVector using [Testcontainers](https://testcontainers.com/)
 
 ![Chat Server Test](.doc/test-chat-server.png)
 
@@ -587,18 +588,7 @@ I had to adjust each prompt after running into odd results. For example, the eva
 
 For a production system, you'd definitely need a lot of prompt tuning and testing to get things right, for both the system and the evaluator, I suppose that’s part of the "fun" when working with GenAI.
 
-This whole setup can run locally without needing powerful hardware, the models are lightweight enough for a laptop. That said, it's slow. To speed things up for CI, I disabled all tests except for this basic one:
-
-```kotlin
-@Test
-@EnabledIfCI
-fun `should be up and running`() {
-  val chatId = UUID.randomUUID().toString()
-  val chatResponse = chatService.chat(chatId, "Hello!")
-
-  assertThat(chatResponse).isNotNull() // Any response is good 👌
-}
-```
+You can run the tests locally with Ollama, but results tend to be flaky without adequate GPU hardware. Using a hosted model provider is a better option. In our case, we use the Gemini profile for both local development and CI.
 
 ## Run
 

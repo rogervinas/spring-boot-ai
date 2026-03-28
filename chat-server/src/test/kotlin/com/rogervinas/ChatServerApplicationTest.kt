@@ -79,7 +79,7 @@ class ChatServerApplicationTest {
             )
                 .param("answer", evaluationRequest.responseContent)
                 .param("claim", evaluationRequest.userText)
-        }.evaluate(EvaluationRequest("The AI agent has at least these three tools available: get date, get weather and book accommodation", chatResponse))
+        }.evaluate(EvaluationRequest("The AI agent has at least these two tools available: get weather and book accommodation", chatResponse))
 
         assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
     }
@@ -93,7 +93,7 @@ class ChatServerApplicationTest {
         ]
     )
     @Order(1)
-    fun `should use clock tool`(date: String, be: String, expectedDate: String) {
+    fun `should understand relative dates`(date: String, be: String, expectedDate: String) {
         val chatId = UUID.randomUUID().toString()
         val chatResponse = chatService.chat(chatId, "What day $be $date?")
 

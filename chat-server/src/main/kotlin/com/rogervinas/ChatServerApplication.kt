@@ -12,9 +12,14 @@ import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.core.JdbcTemplate
+import org.springframework.jdbc.core.queryForObject
+import java.time.Clock
 
 @SpringBootApplication
-class ChatServerApplication
+class ChatServerApplication {
+    @Bean
+    fun clock(): Clock = Clock.systemDefaultZone()
+}
 
 @Configuration
 class VectorStoreConfiguration {
@@ -47,7 +52,7 @@ class VectorStoreConfiguration {
     }
 
     private fun vectorStoreCount(jdbcTemplate: JdbcTemplate, tableName: String) =
-        jdbcTemplate.queryForObject("SELECT COUNT(*) FROM $tableName", Int::class.java)
+        jdbcTemplate.queryForObject<Int>("SELECT COUNT(*) FROM $tableName")
 }
 
 fun main(args: Array<String>) {
