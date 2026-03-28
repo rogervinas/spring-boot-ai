@@ -1,6 +1,5 @@
 package com.rogervinas
 
-import com.fasterxml.jackson.databind.ObjectMapper
 import org.slf4j.LoggerFactory
 import org.springframework.ai.document.Document
 import org.springframework.ai.vectorstore.VectorStore
@@ -13,6 +12,7 @@ import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.jdbc.core.queryForObject
+import tools.jackson.databind.ObjectMapper
 import java.time.Clock
 
 @SpringBootApplication

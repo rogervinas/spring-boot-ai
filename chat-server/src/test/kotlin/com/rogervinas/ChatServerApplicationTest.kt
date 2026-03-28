@@ -21,7 +21,6 @@ import org.springframework.ai.evaluation.EvaluationRequest
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment.RANDOM_PORT
-import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.testcontainers.containers.ComposeContainer
 import org.testcontainers.containers.wait.strategy.Wait.forLogMessage
@@ -34,7 +33,6 @@ import java.util.UUID
 
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("test", "gemini")
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @Testcontainers
 class ChatServerApplicationTest {

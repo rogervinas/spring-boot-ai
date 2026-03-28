@@ -34,9 +34,6 @@ dependencies {
     implementation("org.springframework.ai:spring-ai-starter-mcp-client")
     implementation("org.springframework.ai:spring-ai-advisors-vector-store")
 
-    // TODO remove when spring-ai is updated to use Jackson 3
-    implementation("org.springframework.boot:spring-boot-jackson2")
-
     // ollama
     implementation("org.springframework.ai:spring-ai-starter-model-ollama")
 
@@ -89,10 +86,15 @@ tasks.withType<Test> {
         events(PASSED, SKIPPED, FAILED)
     }
     setSystemProperties { systemProperty(it.first, it.second) }
+    val springProfilesActive = System.getenv("SPRING_PROFILES_ACTIVE") ?: "gemini"
+    systemProperty("spring.profiles.active", "test,$springProfilesActive")
 }
 
 tasks.withType<JavaExec> {
     setSystemProperties { systemProperty(it.first, it.second) }
+    require(System.getenv("SPRING_PROFILES_ACTIVE") != null) {
+        "SPRING_PROFILES_ACTIVE must be set (e.g. ollama, gemini, bedrock)"
+    }
 }
 
 private fun setSystemProperties(setSystemProperty: (Pair<String, Any>) -> Unit) {

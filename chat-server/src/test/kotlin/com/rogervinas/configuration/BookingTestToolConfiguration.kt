@@ -19,14 +19,16 @@ class BookingTestToolConfiguration {
 
 @Service
 class BookingTestTool(private val bookingTestService: BookingTestService) {
+    // TODO use LocalDate directly when Spring AI fixes JsonParser.toTypedObject for bare string values
+    //  see https://github.com/spring-projects/spring-ai/issues/5696
     @Tool(
         description = "make a reservation for accommodation for a given city and date",
     )
     fun book(
         @ToolParam(description = "the city to make the reservation for") city: String,
-        @ToolParam(description = "the check-in date, when the reservation begins") checkinDate: LocalDate,
-        @ToolParam(description = "the check-out date, when the reservation ends") checkoutDate: LocalDate
-    ): String = bookingTestService.book(city, checkinDate, checkoutDate)
+        @ToolParam(description = "the check-in date, when the reservation begins") checkinDate: String,
+        @ToolParam(description = "the check-out date, when the reservation ends") checkoutDate: String
+    ): String = bookingTestService.book(city, LocalDate.parse(checkinDate), LocalDate.parse(checkoutDate))
 }
 
 interface BookingTestService {

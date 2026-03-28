@@ -5,6 +5,10 @@
 ![SpringBoot](https://img.shields.io/badge/SpringBoot-4.x-blue?labelColor=black)
 ![SpringAI](https://img.shields.io/badge/SpringAI-2.x-blue?labelColor=black)
 
+![Gemini](https://img.shields.io/badge/Gemini-✓-4285F4?labelColor=black)
+![Bedrock](https://img.shields.io/badge/Bedrock-✓-FF9900?labelColor=black)
+![Ollama](https://img.shields.io/badge/Ollama-✓-FFFFFF?labelColor=black)
+
 # Spring Boot AI
 
 In this example, inspired by [Building Agents with AWS: Complete Tutorial](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like:
@@ -68,9 +72,9 @@ class BookingTool(private val bookingService: BookingService) {
   fun book(
     @ToolParam(description = "the city to make the reservation for")
     city: String,
-    @ToolParam(description = "the check-in date, when the guest begins their stay")
+    @ToolParam(description = "the check-in date, when the reservation begins")
     checkinDate: LocalDate,
-    @ToolParam(description = "the check-out date, when the guest ends their stay")
+    @ToolParam(description = "the check-out date, when the reservation ends")
     checkoutDate: LocalDate
   ): String = bookingService.book(city, checkinDate, checkoutDate) // Delegate to a service
 }
@@ -192,6 +196,7 @@ class ChatClientConfiguration {
       Do not include any indication of what you're thinking.
       Use the tools available to you to answer the questions.
       Just give the answer.
+      When booking accommodation for a weekend, assume check-in on Saturday and check-out on Monday.
       Current date: {currentDate}
       """.trimIndent()
     return builder
@@ -304,7 +309,11 @@ spring:
     password: "password"
     driver-class-name: org.postgresql.Driver
   ai:
-   mcp:
+    model:
+      chat: none
+      embedding:
+        text: none
+    mcp:
       client:
         toolcallback:
           enabled: true
@@ -368,7 +377,8 @@ spring:
   ai:
     model:
       chat: "google-genai"
-      embedding: "google-genai"
+      embedding:
+        text: "google-genai"
     google:
       genai:
         api-key: "${GOOGLE_API_KEY}"
@@ -503,11 +513,18 @@ class McpServerApplicationTest {
 }
 ```
 
+To run the MCP Server tests:
+
+```shell
+cd mcp-server
+./gradlew test
+```
+
 ### Test Chat Server
 
 To test the **Chat Server**, we will:
+* Override the default profile to `gemini` and disable the MCP client in [application-test.yml](chat-server/src/test/resources/application-test.yml) (overridable via `SPRING_PROFILES_ACTIVE`).
 * Replace the remote **Booking Tool** by a local **Booking Test Tool** with the same signature.
-  * Disable the MCP client with `spring.ai.mcp.client.enabled: false` in `application-test.yml`.
   * Create the local **Book Testing Tool** in [BookingTestToolConfiguration.kt](chat-server/src/main/kotlin/com/rogervinas/BookingTestToolConfiguration.kt).
 * Mock the downstream services **Weather Service** and **Booking Service** with `MockitoBean`.
 * Create a fixed **Clock** to control the current date in [ClockTestToolConfiguration.kt](chat-server/src/test/kotlin/com/rogervinas/configuration/ClockTestToolConfiguration.kt)
@@ -588,7 +605,26 @@ I had to adjust each prompt after running into odd results. For example, the eva
 
 For a production system, you'd definitely need a lot of prompt tuning and testing to get things right, for both the system and the evaluator, I suppose that’s part of the "fun" when working with GenAI.
 
-You can run the tests locally with Ollama, but results tend to be flaky without adequate GPU hardware. Using a hosted model provider is a better option. In our case, we use the Gemini profile for both local development and CI.
+By default, tests use the Gemini profile both locally and in CI (requires `GOOGLE_API_KEY`).
+
+```shell
+cd chat-server
+./gradlew test
+```
+
+To test locally with Ollama (requires [Ollama](#running-ollama-locally) to be up, results may be flaky without adequate GPU hardware):
+
+```shell
+cd chat-server
+SPRING_PROFILES_ACTIVE=ollama ./gradlew test
+```
+
+To test locally with Bedrock (requires AWS credentials):
+
+```shell
+cd chat-server
+SPRING_PROFILES_ACTIVE=bedrock ./gradlew test
+```
 
 ## Run
 
@@ -617,6 +653,20 @@ cd chat-server
 docker compose -f docker-compose-vectordb.yml up -d
 ```
 
+To stop it:
+
+```shell
+cd chat-server
+docker compose -f docker-compose-vectordb.yml down
+```
+
+To stop it and remove all volumes (removes all vector database data):
+
+```shell
+cd chat-server
+docker compose -f docker-compose-vectordb.yml down -v
+```
+
 ### Running Ollama locally
 
 If you want to use local LLMs, you can run Ollama either via Docker Compose or as a native application (more info at [ollama.com](https://ollama.com/)).
@@ -624,6 +674,13 @@ If you want to use local LLMs, you can run Ollama either via Docker Compose or a
 ```shell
 cd chat-server
 docker compose -f docker-compose-ollama.yml up -d
+```
+
+To stop it:
+
+```shell
+cd chat-server
+docker compose -f docker-compose-ollama.yml down
 ```
 
 ### Running the application
@@ -654,27 +711,11 @@ cd chat-server
 SPRING_PROFILES_ACTIVE=bedrock ./gradlew bootRun
 ```
 
-3. Execute queries
+3. Start chatting
 
-You can access the API at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) or use any HTTP client of your choice. Below are some examples using `curl`:
+A simple chat UI is available at [http://localhost:8080/chat.html](http://localhost:8080/chat.html) (disclaimer: this UI was entirely AI-generated as frontend is not the goal of this PoC).
 
-```shell
-curl -X POST "http://localhost:8080/2/chat" \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "question=I want to go to a city with a beach. Where should I go?"
-```
-
-```shell
-curl -X POST "http://localhost:8080/2/chat" \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "question=How is the weather like in Madrid for the weekend?"
-```
-
-```shell
-curl -X POST "http://localhost:8080/2/chat" \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "question=Can I get a hotel for Berlin next monday for two nights?"
-```
+You can also explore the API endpoints at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
 
 ## How to use other AI models
 

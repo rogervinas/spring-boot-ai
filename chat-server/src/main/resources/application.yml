@@ -9,7 +9,8 @@ spring:
   ai:
     model:
       chat: none
-      embedding: none
+      embedding:
+        text: none
     mcp:
       client:
         toolcallback:

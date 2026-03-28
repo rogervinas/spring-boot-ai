@@ -1,4 +1,11 @@
 spring:
+  # GoogleGenAiEmbeddingConnectionAutoConfiguration has no @ConditionalOnProperty guard,
+  # so it activates whenever the Google GenAI classes are on the classpath.
+  # This exclusion can be removed if only Bedrock dependencies are added; it's needed
+  # here because this PoC supports multiple model providers.
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.google.genai.autoconfigure.embedding.GoogleGenAiEmbeddingConnectionAutoConfiguration
   ai:
     model:
       embedding: "bedrock-cohere"
