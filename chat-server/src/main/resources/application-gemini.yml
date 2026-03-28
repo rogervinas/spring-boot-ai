@@ -4,6 +4,13 @@ spring:
       chat: "google-genai"
       embedding:
         text: "google-genai"
+    # Retry with backoff to handle Gemini free-tier rate limits (5 RPM chat, 100 RPM embedding)
+    retry:
+      max-attempts: 5
+      exponential-backoff:
+        initial-interval: 60s
+        multiplier: 2
+        max-interval: 180s
     google:
       genai:
         api-key: "${GOOGLE_API_KEY}"
