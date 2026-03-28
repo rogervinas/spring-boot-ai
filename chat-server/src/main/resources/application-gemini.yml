@@ -1,0 +1,23 @@
+spring:
+  ai:
+    model:
+      chat: "google-genai"
+      embedding: "google-genai"
+    google:
+      genai:
+        api-key: "${GOOGLE_API_KEY}"
+        chat:
+          options:
+            model: "gemini-2.5-flash"
+            temperature: 0.7
+        embedding:
+          api-key: "${GOOGLE_API_KEY}"
+          text:
+            options:
+              model: "gemini-embedding-001"
+              dimensions: 768
+    vectorstore:
+      pgvector:
+        table-name: "vector_store_gemini"
+        dimensions: 768
+        initialize-schema: true

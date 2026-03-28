@@ -1,6 +1,4 @@
 spring:
-  profiles:
-    active: "ollama"
   application:
     name: chat-server
   datasource:
@@ -9,6 +7,9 @@ spring:
     password: "password"
     driver-class-name: org.postgresql.Driver
   ai:
+    model:
+      chat: none
+      embedding: none
     mcp:
       client:
         toolcallback:

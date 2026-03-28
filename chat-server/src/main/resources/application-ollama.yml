@@ -15,5 +15,6 @@ spring:
           model: "nomic-embed-text"
     vectorstore:
       pgvector:
+        table-name: "vector_store_ollama"
         dimensions: 768
         initialize-schema: true

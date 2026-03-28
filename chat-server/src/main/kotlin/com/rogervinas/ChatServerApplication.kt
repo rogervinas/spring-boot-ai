@@ -8,6 +8,7 @@ import org.springframework.boot.ApplicationRunner
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import org.springframework.context.annotation.Bean
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Configuration
 import org.springframework.core.io.ClassPathResource
 import org.springframework.jdbc.core.JdbcTemplate
@@ -24,10 +25,11 @@ class VectorStoreConfiguration {
     fun vectorStoreInitializer(
         vectorStore: VectorStore,
         jdbcTemplate: JdbcTemplate,
-        objectMapper: ObjectMapper
+        objectMapper: ObjectMapper,
+        @Value("\${spring.ai.vectorstore.pgvector.table-name:vector_store}") tableName: String
     ) = ApplicationRunner {
         val logger = LoggerFactory.getLogger(ChatServerApplication::class.java)
-        val vectorStoreCount = vectorStoreCount(jdbcTemplate)
+        val vectorStoreCount = vectorStoreCount(jdbcTemplate, tableName)
         if (vectorStoreCount == 0) {
             logger.info("Initializing vector store ...")
             val cities = ClassPathResource("cities.json").inputStream.use {
@@ -44,8 +46,8 @@ class VectorStoreConfiguration {
         }
     }
 
-    private fun vectorStoreCount(jdbcTemplate: JdbcTemplate) =
-        jdbcTemplate.queryForObject("SELECT COUNT(*) FROM vector_store", Int::class.java)
+    private fun vectorStoreCount(jdbcTemplate: JdbcTemplate, tableName: String) =
+        jdbcTemplate.queryForObject("SELECT COUNT(*) FROM $tableName", Int::class.java)
 }
 
 fun main(args: Array<String>) {

@@ -12,8 +12,6 @@ import org.junit.jupiter.api.MethodOrderer
 import org.junit.jupiter.api.Order
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestMethodOrder
-import org.junit.jupiter.api.condition.DisabledIfEnvironmentVariable
-import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import org.junit.jupiter.params.ParameterizedTest
 import org.junit.jupiter.params.provider.CsvSource
 import org.junit.jupiter.params.provider.ValueSource
@@ -36,7 +34,7 @@ import java.util.UUID
 
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
-@ActiveProfiles("test", "ollama")
+@ActiveProfiles("test", "gemini")
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
 @Testcontainers
 class ChatServerApplicationTest {
@@ -44,9 +42,8 @@ class ChatServerApplicationTest {
     companion object {
         @Container
         @JvmStatic
-        val container = ComposeContainer(File("docker-compose.yml"))
+        val container = ComposeContainer(File("docker-compose-vectordb.yml"))
             .withExposedService("vectordb", 5432, forLogMessage(".*database system is ready to accept connections.*", 1))
-            .withExposedService("ollama", 11434, forLogMessage(".*inference compute.*", 1))
     }
 
     @Autowired
@@ -66,17 +63,6 @@ class ChatServerApplicationTest {
 
     @Test
     @Order(0)
-    @EnabledIfCI
-    fun `should be up and running`() {
-        val chatId = UUID.randomUUID().toString()
-        val chatResponse = chatService.chat(chatId, "Hello!")
-
-        assertThat(chatResponse).isNotNull()
-    }
-
-    @Test
-    @Order(0)
-    @DisabledIfCI
     fun `should have tools available`() {
         val chatId = UUID.randomUUID().toString()
         val chatResponse = chatService.chat(chatId, "Please enumerate the list of tools you have available")
@@ -107,7 +93,6 @@ class ChatServerApplicationTest {
         ]
     )
     @Order(1)
-    @DisabledIfCI
     fun `should use clock tool`(date: String, be: String, expectedDate: String) {
         val chatId = UUID.randomUUID().toString()
         val chatResponse = chatService.chat(chatId, "What day $be $date?")
@@ -138,7 +123,6 @@ class ChatServerApplicationTest {
             "I would like to visit a city with great history and culture. Any suggestions?",
         ]
     )
-    @DisabledIfCI
     fun `should give relevant information`(question: String) {
         val chatId = UUID.randomUUID().toString()
         val chatResponse = chatService.chat(chatId, question)
@@ -162,7 +146,6 @@ class ChatServerApplicationTest {
 
     @ParameterizedTest
     @ValueSource(strings = ["Barcelona", "Madrid"])
-    @DisabledIfCI
     fun `should have memory for each chat`(favouriteCity: String) {
         val chatId = UUID.randomUUID().toString()
         val chatResponseIgnored = chatService.chat(chatId, "My favourite city is $favouriteCity, what do you think?")
@@ -194,7 +177,6 @@ class ChatServerApplicationTest {
             "Toronto, this weekend, mostly cloudy with a high of 13°C, 2025-04-19, 2025-04-20",
         ]
     )
-    @DisabledIfCI
     fun `should get weather conditions`(city: String, date: String, weather: String, date1: LocalDate, date2: LocalDate) {
         val cityCaptor = argumentCaptor<String>()
         val dateCaptor = argumentCaptor<LocalDate>()
@@ -227,7 +209,6 @@ class ChatServerApplicationTest {
     }
 
     @Test
-    @DisabledIfCI
     fun `should fail getting weather conditions`() {
         doAnswer { c -> "Sorry I do not have weather information at the moment" }
             .whenever(weatherService).getWeather(any(), any())
@@ -260,7 +241,6 @@ class ChatServerApplicationTest {
             "Berlin, this weekend, 2025-04-19, 2025-04-21",
         ]
     )
-    @DisabledIfCI
     fun `should book accommodation`(city: String, date: String, checkInDate: LocalDate, checkOutDate: LocalDate) {
         val cityCaptor = argumentCaptor<String>()
         val checkInDateCaptor = argumentCaptor<LocalDate>()
@@ -294,7 +274,6 @@ class ChatServerApplicationTest {
     }
 
     @Test
-    @DisabledIfCI
     fun `should fail booking accommodation`() {
         doAnswer { c -> "Unfortunately, the accommodation is fully booked for the selected dates" }
             .whenever(bookingTestService).book(any(), any(), any())
@@ -319,9 +298,3 @@ class ChatServerApplicationTest {
         assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
     }
 }
-
-@DisabledIfEnvironmentVariable(named = "CI", matches = "true")
-annotation class DisabledIfCI
-
-@EnabledIfEnvironmentVariable(named = "CI", matches = "true")
-annotation class EnabledIfCI

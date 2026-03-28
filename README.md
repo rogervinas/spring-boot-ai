@@ -15,7 +15,7 @@ In this example, inspired by [Building Agents with AWS: Complete Tutorial](https
 
 This project is indexed and certified by [MCP Review](https://mcpreview.com/mcp-servers/rogervinas/spring-boot-ai)
 
-The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but one of the great things about **Spring AI** is that with just a few config tweaks and dependency changes, the same code works with any other supported model. In our case, we’ll use [Ollama](https://ollama.com/), which will hopefully let us run locally and in CI without heavy hardware requirements 🙏
+The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but one of the great things about **Spring AI** is that with just a few config tweaks, the same code works with any other supported model. This project supports three profiles: [Ollama](https://ollama.com/) (local), [Google Gemini](https://ai.google.dev/) and [AWS Bedrock](https://aws.amazon.com/bedrock/).
 
 The application features an AI agent that helps users book accommodations in tourist destinations.
 
@@ -39,10 +39,16 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
       * [Chat Controller](#chat-controller)
       * [Vector Store Initializer](#vector-store-initializer)
 * [Configuration](#configuration)
+  * [Ollama profile](#ollama-profile)
+  * [Gemini profile](#gemini-profile)
+  * [Bedrock profile](#bedrock-profile)
 * [Test](#test)
   * [Test MCP Server](#test-mcp-server)
   * [Test Chat Server](#test-chat-server)
 * [Run](#run)
+  * [Running the vector database](#running-the-vector-database)
+  * [Running Ollama locally](#running-ollama-locally)
+  * [Running the application](#running-the-application)
 * [How to use other AI models](#how-to-use-other-ai-models)
 * [Documentation](#documentation)
 
@@ -90,6 +96,8 @@ The **Chat Server** is a Spring Boot application built with the following depend
 * `spring-ai-starter-mcp-client` - to use MCP
 * `spring-ai-starter-vector-store-pgvector` and `spring-ai-advisors-vector-store` - to enable RAG with PGVector
 * `spring-ai-starter-model-ollama` - to use Ollama models
+* `spring-ai-starter-model-google-genai` and `spring-ai-starter-model-google-genai-embedding` - to use Google Gemini models
+* `spring-ai-starter-model-bedrock` and `spring-ai-starter-model-bedrock-converse` - to use AWS Bedrock models
 
 #### Components
 
@@ -280,7 +288,6 @@ You can find the full version of `vectorStoreInitializer` in [ChatServerApplicat
 ## Configuration
 
 In the main `application.yml` file, we define global configuration values:
-* Set the active Spring profile to `ollama`, allowing us to configure specific properties for the Ollama model in the `application-ollama.yml` file.
 * Configure the datasource to connect to a PostgreSQL database with PGVector support.
 * Set the server port to `8080`.
 * Configure the URL of the remote **Booking Tool** MCP server.
@@ -288,8 +295,6 @@ In the main `application.yml` file, we define global configuration values:
 
 ```yaml
 spring:
-  profiles:
-    active: "ollama"
   application:
     name: chat-server
   datasource:
@@ -297,7 +302,7 @@ spring:
     username: "postgres"
     password: "password"
     driver-class-name: org.postgresql.Driver
-  ai: 
+  ai:
    mcp:
       client:
         toolcallback:
@@ -315,7 +320,11 @@ logging:
     org.springframework.ai.chat.client.advisor: INFO
 ```
 
-In the `ollama` profile configuration file, `application-ollama.yml`, we configure **Spring AI** to use Ollama models:
+The AI model is configured via Spring profiles. Each profile sets the chat model, embedding model, and vector store dimensions. The active profile must be specified at runtime using `SPRING_PROFILES_ACTIVE`.
+
+### Ollama profile
+
+In `application-ollama.yml`, we configure **Spring AI** to use Ollama models:
 * Set the base URL for the Ollama server to `http://localhost:11434`.
 * Set the chat model to [llama3.1:8b](https://ollama.com/library/llama3.1:8b) (must be a **tools**-enabled model).
 * Set the embedding model to [nomic-embed-text](https://ollama.com/library/nomic-embed-text).
@@ -340,7 +349,76 @@ spring:
           model: "nomic-embed-text"
     vectorstore:
       pgvector:
+        table-name: "vector_store_ollama"
         dimensions: 768
+        initialize-schema: true
+```
+
+### Gemini profile
+
+In `application-gemini.yml`, we configure **Spring AI** to use Google Gemini models:
+* Set the Google API key from the `GOOGLE_API_KEY` environment variable.
+* Set the chat model to `gemini-2.5-flash`.
+* Set the embedding model to `gemini-embedding-001` with 768 dimensions.
+* Configure PGVector as the vector store with 768 dimensions.
+
+```yaml
+spring:
+  ai:
+    model:
+      chat: "google-genai"
+      embedding: "google-genai"
+    google:
+      genai:
+        api-key: "${GOOGLE_API_KEY}"
+        chat:
+          options:
+            model: "gemini-2.5-flash"
+            temperature: 0.7
+        embedding:
+          api-key: "${GOOGLE_API_KEY}"
+          text:
+            options:
+              model: "gemini-embedding-001"
+              dimensions: 768
+    vectorstore:
+      pgvector:
+        table-name: "vector_store_gemini"
+        dimensions: 768
+        initialize-schema: true
+```
+
+### Bedrock profile
+
+In `application-bedrock.yml`, we configure **Spring AI** to use AWS Bedrock models:
+* Set the AWS credentials and region from environment variables.
+* Set the chat model using Bedrock Converse API.
+* Set the embedding model using Bedrock Cohere.
+* Configure PGVector as the vector store with 1024 dimensions (matching the Cohere embedding model size).
+
+```yaml
+spring:
+  ai:
+    model:
+      embedding: "bedrock-cohere"
+      chat: "bedrock-converse"
+    bedrock:
+      aws:
+        access-key: "${AWS_ACCESS_KEY_ID}"
+        secret-key: "${AWS_SECRET_ACCESS_KEY}"
+        region: "${AWS_REGION:eu-central-1}"
+      converse:
+        chat:
+          options:
+            model: "${AWS_BEDROCK_CHAT_MODEL}"
+            max-tokens: 2048
+      cohere:
+        embedding:
+          model: "${AWS_BEDROCK_EMBEDDING_MODEL}"
+    vectorstore:
+      pgvector:
+        table-name: "vector_store_bedrock"
+        dimensions: 1024
         initialize-schema: true
 ```
 
@@ -524,7 +602,41 @@ fun `should be up and running`() {
 
 ## Run
 
-We run Ollama locally using `docker compose` but you can also install it natively on your machine.
+You can configure the application using environment variables or a `system.properties` file in the root directory. This file is ignored by Git and is loaded by both `./gradlew bootRun` and tests.
+
+Example `system.properties`:
+
+```properties
+# AWS Bedrock
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_REGION=eu-central-1
+AWS_BEDROCK_CHAT_MODEL=...
+AWS_BEDROCK_EMBEDDING_MODEL=...
+
+# Google Gemini
+GOOGLE_API_KEY=...
+```
+
+### Running the vector database
+
+All profiles require PGVector for the RAG vector database:
+
+```shell
+cd chat-server
+docker compose -f docker-compose-vectordb.yml up -d
+```
+
+### Running Ollama locally
+
+If you want to use local LLMs, you can run Ollama either via Docker Compose or as a native application (more info at [ollama.com](https://ollama.com/)).
+
+```shell
+cd chat-server
+docker compose -f docker-compose-ollama.yml up -d
+```
+
+### Running the application
 
 1. Start MCP server
 ```shell
@@ -532,20 +644,27 @@ cd mcp-server
 ./gradlew bootRun
 ```
 
-2. Start docker compose
+2. Start Chat Server with one of the following profiles:
 
+**Ollama** (requires [Ollama](#running-ollama-locally) and [vector database](#running-the-vector-database)):
 ```shell
 cd chat-server
-docker compose up -d
+SPRING_PROFILES_ACTIVE=ollama ./gradlew bootRun
 ```
 
-3. Start Chat Server
+**Gemini** (requires [vector database](#running-the-vector-database) and `GOOGLE_API_KEY`):
 ```shell
 cd chat-server
-./gradlew bootRun
+SPRING_PROFILES_ACTIVE=gemini ./gradlew bootRun
 ```
 
-4. Execute queries
+**Bedrock** (requires [vector database](#running-the-vector-database) and AWS credentials):
+```shell
+cd chat-server
+SPRING_PROFILES_ACTIVE=bedrock ./gradlew bootRun
+```
+
+3. Execute queries
 
 You can access the API at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) or use any HTTP client of your choice. Below are some examples using `curl`:
 
@@ -572,9 +691,7 @@ curl -X POST "http://localhost:8080/2/chat" \
 To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by **Spring AI**, follow these steps:
 * Add the required dependencies
 * Configure the model in its own `application-<model>.yml` file
-* Activate the profile using `spring.profiles.active=<model>` in the main `application.yml` file
-
-For example, check out the [bedrock](https://github.com/rogervinas/spring-boot-ai/tree/bedrock) branch for the [AWS Bedrock](https://aws.amazon.com/bedrock/) model configuration.
+* Activate the profile using `SPRING_PROFILES_ACTIVE=<model>`
 
 ## Documentation
 
