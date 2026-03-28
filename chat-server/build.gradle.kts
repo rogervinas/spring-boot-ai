@@ -90,7 +90,7 @@ tasks.withType<Test> {
     systemProperty("spring.profiles.active", "test,$springProfilesActive")
 }
 
-tasks.withType<JavaExec> {
+tasks.named<JavaExec>("bootRun") {
     setSystemProperties { systemProperty(it.first, it.second) }
     require(System.getenv("SPRING_PROFILES_ACTIVE") != null) {
         "SPRING_PROFILES_ACTIVE must be set (e.g. ollama, gemini, bedrock)"
