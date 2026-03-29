@@ -7,14 +7,12 @@ spring:
     google:
       genai:
         api-key: "${GOOGLE_API_KEY}"
-        project-id: "xxx"
         chat:
           options:
             model: "gemini-3.1-pro-preview"
             temperature: 0.7
         embedding:
           api-key: "${GOOGLE_API_KEY}"
-          project-id: "xxx"
           text:
             options:
               model: "gemini-embedding-001"
