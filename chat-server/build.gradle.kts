@@ -7,7 +7,7 @@ plugins {
     val kotlinVersion = "2.3.20"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
-    id("org.springframework.boot") version "4.0.4"
+    id("org.springframework.boot") version "4.0.5"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -24,7 +24,7 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "2.0.0-M3"
+val springAiVersion = "2.0.0-M4"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
