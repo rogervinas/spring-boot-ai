@@ -1,7 +1,7 @@
 services:
 
   ollama:
-    image: ollama/ollama:0.17.7
+    image: ollama/ollama:0.18.3
     volumes:
       - ./.ollama:/root/.ollama
     ports:
