@@ -12,6 +12,7 @@ import org.springframework.boot.webtestclient.autoconfigure.AutoConfigureWebTest
 import org.springframework.http.MediaType.APPLICATION_FORM_URLENCODED
 import org.springframework.test.context.bean.override.mockito.MockitoBean
 import org.springframework.test.web.reactive.server.WebTestClient
+import org.springframework.test.web.reactive.server.expectBody
 import java.util.UUID
 
 @WebMvcTest(ChatController::class)
@@ -40,7 +41,7 @@ class ChatControllerTest {
             .bodyValue("question=$chatQuestion")
             .exchange()
             .expectStatus().isOk
-            .expectBody(String::class.java)
+            .expectBody<String>()
             .consumeWith { response ->
                 assertThat(response.responseBody).isEqualTo(chatAnswer)
             }
