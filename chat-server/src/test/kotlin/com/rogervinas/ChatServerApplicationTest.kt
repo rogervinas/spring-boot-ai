@@ -39,7 +39,6 @@ import kotlin.time.Duration.Companion.minutes
 
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @TestMethodOrder(MethodOrderer.OrderAnnotation::class)
-@ExtendWith(SlowDownExtension::class)
 @Testcontainers
 class ChatServerApplicationTest {
 
@@ -300,14 +299,5 @@ class ChatServerApplicationTest {
         }.evaluate(EvaluationRequest("Accommodation cannot be booked for the requested dates", chatResponse))
 
         assertThat(evaluationResult.isPass).isTrue.withFailMessage { evaluationResult.feedback }
-    }
-}
-
-class SlowDownExtension : AfterEachCallback {
-    override fun afterEach(context: ExtensionContext) {
-        // Adds a delay between tests on CI to avoid hitting Gemini free-tier rate limits.
-        if (System.getenv("CI") != null) {
-            Thread.sleep(1.minutes.toJavaDuration())
-        }
     }
 }
