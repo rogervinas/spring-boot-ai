@@ -9,10 +9,12 @@ import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository
 import org.springframework.ai.chat.memory.MessageWindowChatMemory
 import org.springframework.ai.vectorstore.VectorStore
 import org.springframework.stereotype.Service
+import java.time.Clock
+import java.time.LocalDate
 import java.util.concurrent.ConcurrentHashMap
 
 @Service
-class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) {
+class ChatService(vectorStore: VectorStore, private val clock: Clock, private val chatClient: ChatClient) {
 
     private val logger = LoggerFactory.getLogger(ChatService::class.java)
     private val questionAnswerAdvisor = QuestionAnswerAdvisor.builder(vectorStore).build()
@@ -29,6 +31,7 @@ class ChatService(vectorStore: VectorStore, private val chatClient: ChatClient) 
         }
         return chatClient
             .prompt()
+            .system { it.param("currentDate", LocalDate.now(clock)) }
             .user(question)
             .advisors(questionAnswerAdvisor, chatMemoryAdvisor, simpleLoggerAdvisor)
             .call()

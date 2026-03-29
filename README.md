@@ -5,6 +5,10 @@
 ![SpringBoot](https://img.shields.io/badge/SpringBoot-4.x-blue?labelColor=black)
 ![SpringAI](https://img.shields.io/badge/SpringAI-2.x-blue?labelColor=black)
 
+![Gemini](https://img.shields.io/badge/Gemini-✓-4285F4?labelColor=black)
+![Bedrock](https://img.shields.io/badge/Bedrock-✓-FF9900?labelColor=black)
+![Ollama](https://img.shields.io/badge/Ollama-✓-FFFFFF?labelColor=black)
+
 # Spring Boot AI
 
 In this example, inspired by [Building Agents with AWS: Complete Tutorial](https://youtu.be/Y291afdLroQ?si=3xFBJo0Nfa-RmPkV), we will build a simple AI agent application using [Spring AI](https://docs.spring.io/spring-ai/reference/index.html), highlighting key features like:
@@ -15,16 +19,15 @@ In this example, inspired by [Building Agents with AWS: Complete Tutorial](https
 
 This project is indexed and certified by [MCP Review](https://mcpreview.com/mcp-servers/rogervinas/spring-boot-ai)
 
-The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but one of the great things about **Spring AI** is that with just a few config tweaks and dependency changes, the same code works with any other supported model. In our case, we’ll use [Ollama](https://ollama.com/), which will hopefully let us run locally and in CI without heavy hardware requirements 🙏
+The original example uses [AWS Bedrock](https://aws.amazon.com/bedrock/), but one of the great things about **Spring AI** is that with just a few config tweaks, the same code works with any other supported model. This project supports three profiles: [Ollama](https://ollama.com/) (local), [Google Gemini](https://ai.google.dev/) and [AWS Bedrock](https://aws.amazon.com/bedrock/).
 
 The application features an AI agent that helps users book accommodations in tourist destinations.
 
 Through **MCP**, the agent can use the following tools:
-* **Clock Tool**: Provides the current date.
 * **Weather Tool**: Retrieves weather information for a specific city and date.
 * **Booking Tool**: Books accommodations in a city for a specific date.
 
-The **Clock** and **Weather** tools will be implemented locally using **MCP**, while the **Booking** tool will be provided by a remote **MCP server**. Additional information about cities will be retrieved from a vector store using **RAG**.
+The **Weather** tool will be implemented locally using **MCP**, while the **Booking** tool will be provided by a remote **MCP server**. The current date is provided via the system prompt. Additional information about cities will be retrieved from a vector store using **RAG**.
 
 ![Diagram](.doc/diagram.png)
 
@@ -32,17 +35,23 @@ The **Clock** and **Weather** tools will be implemented locally using **MCP**, w
   * [MCP Server](#mcp-server)
   * [Chat Server](#chat-server)
     * [Components](#components)
-      * [Weather and Clock Tools](#weather-and-clock-tools)
+      * [Weather Tool](#weather-tool)
       * [Booking Tool](#booking-tool)
       * [Chat Client](#chat-client)
       * [Chat Service](#chat-service)
       * [Chat Controller](#chat-controller)
       * [Vector Store Initializer](#vector-store-initializer)
 * [Configuration](#configuration)
+  * [Ollama profile](#ollama-profile)
+  * [Gemini profile](#gemini-profile)
+  * [Bedrock profile](#bedrock-profile)
 * [Test](#test)
   * [Test MCP Server](#test-mcp-server)
   * [Test Chat Server](#test-chat-server)
 * [Run](#run)
+  * [Running the vector database](#running-the-vector-database)
+  * [Running Ollama locally](#running-ollama-locally)
+  * [Running the application](#running-the-application)
 * [How to use other AI models](#how-to-use-other-ai-models)
 * [Documentation](#documentation)
 
@@ -63,9 +72,9 @@ class BookingTool(private val bookingService: BookingService) {
   fun book(
     @ToolParam(description = "the city to make the reservation for")
     city: String,
-    @ToolParam(description = "the check-in date, when the guest begins their stay")
+    @ToolParam(description = "the check-in date, when the reservation begins")
     checkinDate: LocalDate,
-    @ToolParam(description = "the check-out date, when the guest ends their stay")
+    @ToolParam(description = "the check-out date, when the reservation ends")
     checkoutDate: LocalDate
   ): String = bookingService.book(city, checkinDate, checkoutDate) // Delegate to a service
 }
@@ -90,17 +99,18 @@ The **Chat Server** is a Spring Boot application built with the following depend
 * `spring-ai-starter-mcp-client` - to use MCP
 * `spring-ai-starter-vector-store-pgvector` and `spring-ai-advisors-vector-store` - to enable RAG with PGVector
 * `spring-ai-starter-model-ollama` - to use Ollama models
+* `spring-ai-starter-model-google-genai` and `spring-ai-starter-model-google-genai-embedding` - to use Google Gemini models
+* `spring-ai-starter-model-bedrock` and `spring-ai-starter-model-bedrock-converse` - to use AWS Bedrock models
 
 #### Components
 
 * **MCP Tools**
   * **Weather Tool** - a local MCP tool that queries a **WeatherService** for the weather in a given city on a given date
-  * **Clock Tool** - a local MCP tool that returns the system date, letting us control the date the AI agent uses to avoid unpredictability
   * **Booking Tool** - a remote MCP tool that connects to the Booking MCP Server to reserve accommodations
 * **Chat**
   * **Chat Client** - a **Spring AI** ChatClient configured with:
-    * A system prompt to define the AI agent’s role
-    * The Ollama model autoconfigured by Spring Boot
+    * A system prompt to define the AI agent’s role and the current date
+    * The AI model autoconfigured by Spring Boot via the active profile
     * The above MCP tools as part of the AI agent’s toolset
   * **Chat Service** - wraps the **Chat Client** and adds three advisors:
     * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
@@ -111,9 +121,9 @@ The **Chat Server** is a Spring Boot application built with the following depend
 
 Let's implement this step by step ...
 
-#### Weather and Clock Tools
+#### Weather Tool
 
-Here's how the **Weather Tool** is implemented (the same applies to **Clock Tool**):
+Here's how the **Weather Tool** is implemented:
 
 1. Create an instance and annotate it with `@Tool` and `@ToolParam`:
 ```kotlin
@@ -143,19 +153,11 @@ class WeatherToolConfiguration {
 
 #### Booking Tool
 
-To set up the **Booking Tool** as a remote MCP tool, we just need to configure the MCP client [SSE connection](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html#_sse_transport_properties)  in `application.yml`:
+To set up the **Booking Tool** as a remote MCP tool, we just need to configure the MCP client [SSE connection](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html#_sse_transport_properties)  in [application.properties](chat-server/src/main/resources/application.properties):
 
-```yaml
-spring:
-  ai:
-    mcp:
-      client:
-        toolcallback:
-          enabled: true
-        sse:
-          connections:
-            booking-tool:
-              url: "http://localhost:8081"
+```properties
+spring.ai.mcp.client.toolcallback.enabled=true
+spring.ai.mcp.client.sse.connections.booking-tool.url=http://localhost:8081
 ```
 
 You can find all the alternative configurations in [MCP Client Boot Starter](https://docs.spring.io/spring-ai/reference/api/mcp/mcp-client-boot-starter-docs.html) documentation.
@@ -186,6 +188,8 @@ class ChatClientConfiguration {
       Do not include any indication of what you're thinking.
       Use the tools available to you to answer the questions.
       Just give the answer.
+      When booking accommodation for a weekend, assume check-in on Saturday and check-out on Monday.
+      Current date: {currentDate}
       """.trimIndent()
     return builder
       .defaultSystem(system)
@@ -208,7 +212,8 @@ Here’s the implementation:
 ```kotlin
 @Service // or @Bean / @Component
 class ChatService(
-  vectorStore: VectorStore, 
+  vectorStore: VectorStore,
+  private val clock: Clock,
   private val chatClient: ChatClient
 ) {
   private val logger = LoggerFactory.getLogger(ChatService::class.java)
@@ -226,6 +231,7 @@ class ChatService(
     }
     return chatClient
       .prompt()
+      .system { it.param("currentDate", LocalDate.now(clock)) }
       .user(question)
       .advisors(questionAnswerAdvisor, chatMemoryAdvisor, simpleLoggerAdvisor)
       .call()
@@ -279,43 +285,40 @@ You can find the full version of `vectorStoreInitializer` in [ChatServerApplicat
 
 ## Configuration
 
-In the main `application.yml` file, we define global configuration values:
-* Set the active Spring profile to `ollama`, allowing us to configure specific properties for the Ollama model in the `application-ollama.yml` file.
+We use [application.properties](chat-server/src/main/resources/application.properties) instead of `application.yml` because YAML cannot have both `spring.ai.model.embedding` (scalar, used by Bedrock and Ollama) and `spring.ai.model.embedding.text` (nested, used by Gemini) at the same time. Maybe some day this will be solved, but anyway this is a PoC that supports multiple models — in a production application you'd likely use only one, so this wouldn't be an issue.
+
+In this file, we define global configuration values:
+* Disable all model auto-configurations by default.
 * Configure the datasource to connect to a PostgreSQL database with PGVector support.
 * Set the server port to `8080`.
 * Configure the URL of the remote **Booking Tool** MCP server.
 * Set the logging level for chat advisor debug traces.
 
-```yaml
-spring:
-  profiles:
-    active: "ollama"
-  application:
-    name: chat-server
-  datasource:
-    url: "jdbc:postgresql://localhost:5432/postgres"
-    username: "postgres"
-    password: "password"
-    driver-class-name: org.postgresql.Driver
-  ai: 
-   mcp:
-      client:
-        toolcallback:
-          enabled: true
-        sse:
-          connections:
-            booking-tool:
-              url: "http://localhost:8081"
+```properties
+spring.application.name=chat-server
 
-server:
-  port: 8080
+spring.datasource.url=jdbc:postgresql://localhost:5432/postgres
+spring.datasource.username=postgres
+spring.datasource.password=password
+spring.datasource.driver-class-name=org.postgresql.Driver
 
-logging:
-  level:
-    org.springframework.ai.chat.client.advisor: INFO
+spring.ai.model.chat=none
+spring.ai.model.embedding=none
+spring.ai.model.embedding.text=none
+
+spring.ai.mcp.client.toolcallback.enabled=true
+spring.ai.mcp.client.sse.connections.booking-tool.url=http://localhost:8081
+
+server.port=8080
+
+logging.level.org.springframework.ai.chat.client.advisor=INFO
 ```
 
-In the `ollama` profile configuration file, `application-ollama.yml`, we configure **Spring AI** to use Ollama models:
+The AI model is configured via Spring profiles. Each profile sets the chat model, embedding model, and vector store dimensions. The active profile must be specified at runtime using `SPRING_PROFILES_ACTIVE`.
+
+### Ollama profile
+
+In [application-ollama.yml](chat-server/src/main/resources/application-ollama.yml), we configure **Spring AI** to use Ollama models:
 * Set the base URL for the Ollama server to `http://localhost:11434`.
 * Set the chat model to [llama3.1:8b](https://ollama.com/library/llama3.1:8b) (must be a **tools**-enabled model).
 * Set the embedding model to [nomic-embed-text](https://ollama.com/library/nomic-embed-text).
@@ -340,7 +343,77 @@ spring:
           model: "nomic-embed-text"
     vectorstore:
       pgvector:
+        table-name: "vector_store_ollama"
         dimensions: 768
+        initialize-schema: true
+```
+
+### Gemini profile
+
+In [application-gemini.yml](chat-server/src/main/resources/application-gemini.yml), we configure **Spring AI** to use Google Gemini models:
+* Set the Google API key from the `GOOGLE_API_KEY` environment variable.
+* Set the chat model to `gemini-2.5-flash`.
+* Set the embedding model to `gemini-embedding-001` with 768 dimensions.
+* Configure PGVector as the vector store with 768 dimensions.
+
+```yaml
+spring:
+  ai:
+    model:
+      chat: "google-genai"
+      embedding:
+        text: "google-genai"
+    google:
+      genai:
+        api-key: "${GOOGLE_API_KEY}"
+        chat:
+          options:
+            model: "gemini-2.5-flash"
+            temperature: 0.7
+        embedding:
+          api-key: "${GOOGLE_API_KEY}"
+          text:
+            options:
+              model: "gemini-embedding-001"
+              dimensions: 768
+    vectorstore:
+      pgvector:
+        table-name: "vector_store_gemini"
+        dimensions: 768
+        initialize-schema: true
+```
+
+### Bedrock profile
+
+In [application-bedrock.yml](chat-server/src/main/resources/application-bedrock.yml), we configure **Spring AI** to use AWS Bedrock models:
+* Set the AWS credentials and region from environment variables.
+* Set the chat model using Bedrock Converse API.
+* Set the embedding model using Bedrock Cohere.
+* Configure PGVector as the vector store with 1024 dimensions (matching the Cohere embedding model size).
+
+```yaml
+spring:
+  ai:
+    model:
+      embedding: "bedrock-cohere"
+      chat: "bedrock-converse"
+    bedrock:
+      aws:
+        access-key: "${AWS_ACCESS_KEY_ID}"
+        secret-key: "${AWS_SECRET_ACCESS_KEY}"
+        region: "${AWS_REGION:eu-central-1}"
+      converse:
+        chat:
+          options:
+            model: "${AWS_BEDROCK_CHAT_MODEL}"
+            max-tokens: 2048
+      cohere:
+        embedding:
+          model: "${AWS_BEDROCK_EMBEDDING_MODEL}"
+    vectorstore:
+      pgvector:
+        table-name: "vector_store_bedrock"
+        dimensions: 1024
         initialize-schema: true
 ```
 
@@ -424,16 +497,23 @@ class McpServerApplicationTest {
 }
 ```
 
+To run the MCP Server tests:
+
+```shell
+cd mcp-server
+./gradlew test
+```
+
 ### Test Chat Server
 
 To test the **Chat Server**, we will:
+* Override the default profile to `gemini` and disable the MCP client in [application-test.yml](chat-server/src/test/resources/application-test.yml) (overridable via `SPRING_PROFILES_ACTIVE`).
 * Replace the remote **Booking Tool** by a local **Booking Test Tool** with the same signature.
-  * Disable the MCP client with `spring.ai.mcp.client.enabled: false` in `application-test.yml`.
   * Create the local **Book Testing Tool** in [BookingTestToolConfiguration.kt](chat-server/src/main/kotlin/com/rogervinas/BookingTestToolConfiguration.kt).
 * Mock the downstream services **Weather Service** and **Booking Service** with `MockitoBean`.
-* Create a fixed **Clock** to control the date in [ClockTestToolConfiguration.kt](chat-server/src/test/kotlin/com/rogervinas/configuration/ClockTestToolConfiguration.kt)
+* Create a fixed **Clock** to control the current date in [ClockTestToolConfiguration.kt](chat-server/src/test/kotlin/com/rogervinas/configuration/ClockTestToolConfiguration.kt)
   * Declare it as `@Primary @Bean` to override the default `Clock` bean.
-* Start Docker Compose with both Ollama and PGVector using [Testcontainers](https://testcontainers.com/)
+* Start Docker Compose with PGVector using [Testcontainers](https://testcontainers.com/)
 
 ![Chat Server Test](.doc/test-chat-server.png)
 
@@ -509,22 +589,85 @@ I had to adjust each prompt after running into odd results. For example, the eva
 
 For a production system, you'd definitely need a lot of prompt tuning and testing to get things right, for both the system and the evaluator, I suppose that’s part of the "fun" when working with GenAI.
 
-This whole setup can run locally without needing powerful hardware, the models are lightweight enough for a laptop. That said, it's slow. To speed things up for CI, I disabled all tests except for this basic one:
+By default, tests use the Gemini profile both locally and in CI (requires `GOOGLE_API_KEY`).
 
-```kotlin
-@Test
-@EnabledIfCI
-fun `should be up and running`() {
-  val chatId = UUID.randomUUID().toString()
-  val chatResponse = chatService.chat(chatId, "Hello!")
+```shell
+cd chat-server
+./gradlew test
+```
 
-  assertThat(chatResponse).isNotNull() // Any response is good 👌
-}
+To test locally with Ollama (requires [Ollama](#running-ollama-locally) to be up, results may be flaky without adequate GPU hardware):
+
+```shell
+cd chat-server
+SPRING_PROFILES_ACTIVE=ollama ./gradlew test
+```
+
+To test locally with Bedrock (requires AWS credentials):
+
+```shell
+cd chat-server
+SPRING_PROFILES_ACTIVE=bedrock ./gradlew test
 ```
 
 ## Run
 
-We run Ollama locally using `docker compose` but you can also install it natively on your machine.
+You can configure the application using environment variables or a `system.properties` file in the root directory. This file is ignored by Git and is loaded by both `./gradlew bootRun` and tests.
+
+Example `system.properties`:
+
+```properties
+# AWS Bedrock
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_REGION=eu-central-1
+AWS_BEDROCK_CHAT_MODEL=...
+AWS_BEDROCK_EMBEDDING_MODEL=...
+
+# Google Gemini
+GOOGLE_API_KEY=...
+```
+
+### Running the vector database
+
+All profiles require PGVector for the RAG vector database:
+
+```shell
+cd chat-server
+docker compose -f docker-compose-vectordb.yml up -d
+```
+
+To stop it:
+
+```shell
+cd chat-server
+docker compose -f docker-compose-vectordb.yml down
+```
+
+To stop it and remove all volumes (removes all vector database data):
+
+```shell
+cd chat-server
+docker compose -f docker-compose-vectordb.yml down -v
+```
+
+### Running Ollama locally
+
+If you want to use local LLMs, you can run Ollama either via Docker Compose or as a native application (more info at [ollama.com](https://ollama.com/)).
+
+```shell
+cd chat-server
+docker compose -f docker-compose-ollama.yml up -d
+```
+
+To stop it:
+
+```shell
+cd chat-server
+docker compose -f docker-compose-ollama.yml down
+```
+
+### Running the application
 
 1. Start MCP server
 ```shell
@@ -532,49 +675,38 @@ cd mcp-server
 ./gradlew bootRun
 ```
 
-2. Start docker compose
+2. Start Chat Server with one of the following profiles:
 
+**Ollama** (requires [Ollama](#running-ollama-locally) and [vector database](#running-the-vector-database)):
 ```shell
 cd chat-server
-docker compose up -d
+SPRING_PROFILES_ACTIVE=ollama ./gradlew bootRun
 ```
 
-3. Start Chat Server
+**Gemini** (requires [vector database](#running-the-vector-database) and `GOOGLE_API_KEY`):
 ```shell
 cd chat-server
-./gradlew bootRun
+SPRING_PROFILES_ACTIVE=gemini ./gradlew bootRun
 ```
 
-4. Execute queries
-
-You can access the API at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html) or use any HTTP client of your choice. Below are some examples using `curl`:
-
+**Bedrock** (requires [vector database](#running-the-vector-database) and AWS credentials):
 ```shell
-curl -X POST "http://localhost:8080/2/chat" \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "question=I want to go to a city with a beach. Where should I go?"
+cd chat-server
+SPRING_PROFILES_ACTIVE=bedrock ./gradlew bootRun
 ```
 
-```shell
-curl -X POST "http://localhost:8080/2/chat" \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "question=How is the weather like in Madrid for the weekend?"
-```
+3. Start chatting
 
-```shell
-curl -X POST "http://localhost:8080/2/chat" \
--H "Content-Type: application/x-www-form-urlencoded" \
--d "question=Can I get a hotel for Berlin next monday for two nights?"
-```
+A simple chat UI is available at [http://localhost:8080/chat.html](http://localhost:8080/chat.html) (disclaimer: this UI was entirely AI-generated as frontend is not the goal of this PoC).
+
+You can also explore the API endpoints at [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html).
 
 ## How to use other AI models
 
 To use any of the other [AI models](https://docs.spring.io/spring-ai/reference/api/chatmodel.html) supported by **Spring AI**, follow these steps:
 * Add the required dependencies
 * Configure the model in its own `application-<model>.yml` file
-* Activate the profile using `spring.profiles.active=<model>` in the main `application.yml` file
-
-For example, check out the [bedrock](https://github.com/rogervinas/spring-boot-ai/tree/bedrock) branch for the [AWS Bedrock](https://aws.amazon.com/bedrock/) model configuration.
+* Activate the profile using `SPRING_PROFILES_ACTIVE=<model>`
 
 ## Documentation
 

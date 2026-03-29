@@ -1,4 +1,11 @@
 spring:
+  # TODO GoogleGenAiEmbeddingConnectionAutoConfiguration has no @ConditionalOnProperty guard,
+  # so it activates whenever the Google GenAI classes are on the classpath.
+  # This exclusion can be removed if only Ollama dependencies are added; it's needed
+  # here because this PoC supports multiple model providers.
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.google.genai.autoconfigure.embedding.GoogleGenAiEmbeddingConnectionAutoConfiguration
   ai:
     model:
       embedding: "ollama"
@@ -15,5 +22,6 @@ spring:
           model: "nomic-embed-text"
     vectorstore:
       pgvector:
+        table-name: "vector_store_ollama"
         dimensions: 768
         initialize-schema: true

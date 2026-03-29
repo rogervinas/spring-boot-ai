@@ -19,11 +19,13 @@ class WeatherToolConfiguration {
 
 @Service
 class WeatherTool(private val weatherService: WeatherService) {
+    // TODO use LocalDate directly when Spring AI fixes JsonParser.toTypedObject for bare string values
+    //  see https://github.com/spring-projects/spring-ai/issues/5696
     @Tool(description = "get the weather for a given city and date")
     fun getWeather(
         @ToolParam(description = "the city to get the weather for") city: String,
-        @ToolParam(description = "the date to get the weather for") date: LocalDate
-    ): String = weatherService.getWeather(city, date)
+        @ToolParam(description = "the date to get the weather for") date: String
+    ): String = weatherService.getWeather(city, LocalDate.parse(date))
 }
 
 @Service

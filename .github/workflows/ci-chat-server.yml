@@ -1,16 +1,16 @@
 name: chat-server
 
 on:
-  push:
-    branches: [ main ]
-    paths:
-      - .github/workflows/ci-chat-server.yml
-      - chat-server/**
+  # Only on PRs, not on push to main — avoid Gemini API quota usage since tests already ran on the PR branch
   pull_request:
     branches: [ main ]
     paths:
       - .github/workflows/ci-chat-server.yml
       - chat-server/**
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref }}
+  cancel-in-progress: true
 
 jobs:
   build:
@@ -20,14 +20,6 @@ jobs:
 
       - name: Checkout
         uses: actions/checkout@v6
-
-      - name: Ollama cache
-        uses: actions/cache@v5
-        with:
-          path: ./chat-server/.ollama
-          key: ollama-${{ runner.os }}
-          restore-keys: |
-            ollama-${{ runner.os }}
 
       - name: Set up Java
         uses: actions/setup-java@v5
@@ -39,7 +31,6 @@ jobs:
 
       - name: Build
         working-directory: chat-server
+        env:
+          GOOGLE_API_KEY: ${{ secrets.GOOGLE_API_KEY }}
         run: ./gradlew build --no-daemon --info
-
-      - name: Ollama cache permissions
-        run: sudo chown -R $USER:$USER ./chat-server/.ollama

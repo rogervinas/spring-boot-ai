@@ -1,0 +1,30 @@
+spring:
+  # TODO GoogleGenAiEmbeddingConnectionAutoConfiguration has no @ConditionalOnProperty guard,
+  # so it activates whenever the Google GenAI classes are on the classpath.
+  # This exclusion can be removed if only Bedrock dependencies are added; it's needed
+  # here because this PoC supports multiple model providers.
+  autoconfigure:
+    exclude:
+      - org.springframework.ai.model.google.genai.autoconfigure.embedding.GoogleGenAiEmbeddingConnectionAutoConfiguration
+  ai:
+    model:
+      embedding: "bedrock-cohere"
+      chat: "bedrock-converse"
+    bedrock:
+      aws:
+        access-key: "${AWS_ACCESS_KEY_ID}"
+        secret-key: "${AWS_SECRET_ACCESS_KEY}"
+        region: "${AWS_REGION:eu-central-1}"
+      converse:
+        chat:
+          options:
+            model: "${AWS_BEDROCK_CHAT_MODEL}"
+            max-tokens: 2048
+      cohere:
+        embedding:
+          model: "${AWS_BEDROCK_EMBEDDING_MODEL}"
+    vectorstore:
+      pgvector:
+        table-name: "vector_store_bedrock"
+        dimensions: 1024
+        initialize-schema: true

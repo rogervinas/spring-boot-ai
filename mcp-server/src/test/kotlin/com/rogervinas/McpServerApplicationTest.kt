@@ -75,8 +75,10 @@ class McpServerApplicationTest {
                 "book",
                 mapOf(
                     "city" to city,
-                    "checkinDate" to checkinDate.toEpochDay(),
-                    "checkoutDate" to checkoutDate.toEpochDay()
+                    // TODO use LocalDate directly when Spring AI fixes JsonParser.toTypedObject for bare string values
+                    //  see https://github.com/spring-projects/spring-ai/issues/5696
+                    "checkinDate" to checkinDate.toString(),
+                    "checkoutDate" to checkoutDate.toString()
                 )
             )
         )
