@@ -24,7 +24,7 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "2.0.0-M5"
+val springAiVersion = "2.0.0-M6"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
