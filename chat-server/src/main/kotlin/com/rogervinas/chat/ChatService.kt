@@ -2,7 +2,7 @@ package com.rogervinas.chat
 
 import org.slf4j.LoggerFactory
 import org.springframework.ai.chat.client.ChatClient
-import org.springframework.ai.chat.client.advisor.PromptChatMemoryAdvisor
+import org.springframework.ai.chat.client.advisor.MessageChatMemoryAdvisor
 import org.springframework.ai.chat.client.advisor.SimpleLoggerAdvisor
 import org.springframework.ai.chat.client.advisor.vectorstore.QuestionAnswerAdvisor
 import org.springframework.ai.chat.memory.InMemoryChatMemoryRepository
@@ -19,11 +19,11 @@ class ChatService(vectorStore: VectorStore, private val clock: Clock, private va
     private val logger = LoggerFactory.getLogger(ChatService::class.java)
     private val questionAnswerAdvisor = QuestionAnswerAdvisor.builder(vectorStore).build()
     private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
-    private val chatMemory = ConcurrentHashMap<String, PromptChatMemoryAdvisor>()
+    private val chatMemory = ConcurrentHashMap<String, MessageChatMemoryAdvisor>()
 
     fun chat(chatId: String, question: String): String {
         val chatMemoryAdvisor = chatMemory.computeIfAbsent(chatId) {
-            PromptChatMemoryAdvisor.builder(
+            MessageChatMemoryAdvisor.builder(
                 MessageWindowChatMemory.builder()
                     .chatMemoryRepository(InMemoryChatMemoryRepository())
                     .build()
