@@ -202,7 +202,7 @@ class ChatClientConfiguration {
 
 The **Chat Service** exposes a single `chat` method that takes a chat ID and a user question. It calls the **Chat Client** with the user question along with a set of advisors to enrich the interaction:
 * **QuestionAnswerAdvisor** - retrieves relevant context from a vector store and injects it to the context (RAG)
-* **MessageChatMemoryAdvisor** - retrieves or creates an `InMemoryChatMemoryRepository` for the given chat ID and adds it to the context
+* **MessageChatMemoryAdvisor** - adds conversation history to the user input (chat memory) for the given chat ID
 * **SimpleLoggerAdvisor** - logs internal advisor traces to the console (if `logging.level.org.springframework.ai.chat.client.advisor` is set to `DEBUG`)
 
 Additionally, the question and answer are logged to the console.
@@ -219,21 +219,19 @@ class ChatService(
   private val logger = LoggerFactory.getLogger(ChatService::class.java)
   private val questionAnswerAdvisor = QuestionAnswerAdvisor.builder(vectorStore).build()
   private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
-  private val chatMemory = ConcurrentHashMap<String, MessageChatMemoryAdvisor>()
+  private val chatMemoryAdvisor = MessageChatMemoryAdvisor.builder(
+    MessageWindowChatMemory.builder()
+      .chatMemoryRepository(InMemoryChatMemoryRepository())
+      .build()
+  ).build()
 
   fun chat(chatId: String, question: String): String {
-    val chatMemoryAdvisor = chatMemory.computeIfAbsent(chatId) {
-      MessageChatMemoryAdvisor.builder(
-        MessageWindowChatMemory.builder()
-          .chatMemoryRepository(InMemoryChatMemoryRepository())
-          .build()
-      ).build()
-    }
     return chatClient
       .prompt()
       .system { it.param("currentDate", LocalDate.now(clock)) }
       .user(question)
       .advisors(questionAnswerAdvisor, chatMemoryAdvisor, simpleLoggerAdvisor)
+      .advisors { a -> a.param(ChatMemory.CONVERSATION_ID, chatId) }
       .call()
       .content().apply {
         logger.info("Chat #$chatId question: $question")
