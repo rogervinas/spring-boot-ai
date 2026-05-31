@@ -114,7 +114,7 @@ The **Chat Server** is a Spring Boot application built with the following depend
     * The above MCP tools as part of the AI agent’s toolset
   * **Chat Service** - wraps the **Chat Client** and adds three advisors:
     * **QuestionAnswerAdvisor** - fetches context from a vector store and augments the user input (RAG)
-    * **PromptChatMemoryAdvisor** - adds conversation history to the user input (chat memory)
+    * **MessageChatMemoryAdvisor** - adds conversation history to the user input (chat memory)
     * **SimpleLoggerAdvisor** - logs the chat history to the console (for debugging)
   * **Chat Controller** - exposes a simple REST POST endpoint that takes user input, calls the **Chat Service**, and returns the AI agent’s response
 * **Vector Store Initializer** - loads some sample data into the vector store at startup
@@ -202,7 +202,7 @@ class ChatClientConfiguration {
 
 The **Chat Service** exposes a single `chat` method that takes a chat ID and a user question. It calls the **Chat Client** with the user question along with a set of advisors to enrich the interaction:
 * **QuestionAnswerAdvisor** - retrieves relevant context from a vector store and injects it to the context (RAG)
-* **PromptChatMemoryAdvisor** - retrieves or creates an `InMemoryChatMemoryRepository` for the given chat ID and adds it to the context
+* **MessageChatMemoryAdvisor** - retrieves or creates an `InMemoryChatMemoryRepository` for the given chat ID and adds it to the context
 * **SimpleLoggerAdvisor** - logs internal advisor traces to the console (if `logging.level.org.springframework.ai.chat.client.advisor` is set to `DEBUG`)
 
 Additionally, the question and answer are logged to the console.
@@ -219,11 +219,11 @@ class ChatService(
   private val logger = LoggerFactory.getLogger(ChatService::class.java)
   private val questionAnswerAdvisor = QuestionAnswerAdvisor.builder(vectorStore).build()
   private val simpleLoggerAdvisor = SimpleLoggerAdvisor()
-  private val chatMemory = ConcurrentHashMap<String, PromptChatMemoryAdvisor>()
+  private val chatMemory = ConcurrentHashMap<String, MessageChatMemoryAdvisor>()
 
   fun chat(chatId: String, question: String): String {
     val chatMemoryAdvisor = chatMemory.computeIfAbsent(chatId) {
-      PromptChatMemoryAdvisor.builder(
+      MessageChatMemoryAdvisor.builder(
         MessageWindowChatMemory.builder()
           .chatMemoryRepository(InMemoryChatMemoryRepository())
           .build()
