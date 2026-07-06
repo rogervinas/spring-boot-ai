@@ -32,7 +32,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webclient")
     implementation("org.springframework.boot:spring-boot-starter-jackson")
     implementation("org.springframework.ai:spring-ai-starter-mcp-client")
-    implementation("org.springframework.ai:spring-ai-advisors-vector-store")
+    implementation("org.springframework.ai:spring-ai-vector-store-advisor")
 
     // ollama
     implementation("org.springframework.ai:spring-ai-starter-model-ollama")
