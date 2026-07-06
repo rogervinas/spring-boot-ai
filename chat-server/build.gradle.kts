@@ -4,10 +4,10 @@ import org.gradle.api.tasks.testing.logging.TestLogEvent.SKIPPED
 import java.util.Properties
 
 plugins {
-    val kotlinVersion = "2.3.21"
+    val kotlinVersion = "2.4.0"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
-    id("org.springframework.boot") version "4.0.6"
+    id("org.springframework.boot") version "4.1.0"
     id("io.spring.dependency-management") version "1.1.7"
 }
 
@@ -24,7 +24,7 @@ repositories {
     mavenCentral()
 }
 
-val springAiVersion = "2.0.0-M6"
+val springAiVersion = "2.0.0"
 
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -32,7 +32,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-webclient")
     implementation("org.springframework.boot:spring-boot-starter-jackson")
     implementation("org.springframework.ai:spring-ai-starter-mcp-client")
-    implementation("org.springframework.ai:spring-ai-advisors-vector-store")
+    implementation("org.springframework.ai:spring-ai-vector-store-advisor")
 
     // ollama
     implementation("org.springframework.ai:spring-ai-starter-model-ollama")
@@ -56,7 +56,7 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-webmvc-test")
     testImplementation("org.springframework.boot:spring-boot-webflux-test")
 
-    testImplementation(platform("org.junit:junit-bom:6.1.0"))
+    testImplementation(platform("org.junit:junit-bom:6.1.1"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
