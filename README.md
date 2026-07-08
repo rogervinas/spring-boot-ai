@@ -366,7 +366,7 @@ spring:
         api-key: "${GOOGLE_API_KEY}"
         chat:
           options:
-            model: "gemini-2.5-flash"
+            model: "gemma-4-31b-it"
             temperature: 0.7
         embedding:
           api-key: "${GOOGLE_API_KEY}"
