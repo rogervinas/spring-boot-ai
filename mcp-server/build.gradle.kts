@@ -1,5 +1,5 @@
 plugins {
-    val kotlinVersion = "2.4.0"
+    val kotlinVersion = "2.4.10"
     kotlin("jvm") version kotlinVersion
     kotlin("plugin.spring") version kotlinVersion
     id("org.springframework.boot") version "4.1.0"
@@ -28,7 +28,7 @@ dependencies {
 
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 
-    testImplementation(platform("org.junit:junit-bom:6.1.1"))
+    testImplementation(platform("org.junit:junit-bom:6.1.2"))
     testImplementation("org.junit.jupiter:junit-jupiter")
     testImplementation("org.junit.jupiter:junit-jupiter-params")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
